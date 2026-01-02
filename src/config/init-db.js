@@ -15,6 +15,18 @@ async function initDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS tickets (
+        id SERIAL PRIMARY KEY,
+        category VARCHAR(100) NOT NULL,
+        description TEXT NOT NULL,
+        address TEXT,
+        status VARCHAR(50) DEFAULT 'Новая',
+        resident_id INTEGER REFERENCES users(id),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
     
     // Создаем индекс для email
     await client.query(`

@@ -1,0 +1,6 @@
+module.exports = {
+  NONE: 'NONE',
+  CATEGORY: 'CATEGORY',
+  DESCRIPTION: 'DESCRIPTION',
+  PHOTO: 'PHOTO'
+};

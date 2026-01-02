@@ -5,6 +5,7 @@ require('dotenv').config();
 // Импорт конфигураций
 const initDatabase = require('./config/init-db');
 const userRoutes = require('./routes/userRoutes');
+const ticketRoutes = require('./routes/ticketRoutes');
 
 // Создание приложения
 const app = express();
@@ -34,6 +35,7 @@ app.get('/', (req, res) => {
 
 // Маршруты API
 app.use('/api/users', userRoutes);
+app.use('/api/tickets', ticketRoutes);
 
 // Обработка 404
 app.use((req, res) => {
