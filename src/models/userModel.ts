@@ -14,7 +14,7 @@ export interface IUser {
 class User {
   static async findAll(): Promise<IUser[]> {
     const result = await pool.query(
-      'SELECT id, name, telegram_username, password, created_at FROM users ORDER BY id'
+      'SELECT id, name, telegram_username, role, password, created_at FROM users ORDER BY id'
     );
     return result.rows;
   }
