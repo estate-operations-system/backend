@@ -44,7 +44,6 @@ class UserController {
         return res.status(409).json({ success: false, error: 'Пользователь с таким telegram id уже существует' });
       }
       // TODO: add hashing later
-      // const password_hash = await bcrypt.hash(password, 10);
       const newUser = await User.create({ name, telegram_id, telegram_username, password });
       res.status(201).json({ success: true, message: 'Пользователь создан', data: newUser });
     } catch (error: any) {
@@ -53,7 +52,7 @@ class UserController {
       if (error.code === '23505') { 
         return res.status(409).json({ success: false, error: 'Пользователь с таким email уже существует' });
       }
-      console.log('Ошибка при создании пользователя:', error);
+      console.error('Ошибка при создании пользователя:', error);
       res.status(500).json({ success: false, error: 'Ошибка сервера' });
     }
   }
@@ -65,7 +64,6 @@ class UserController {
       if (!name || !email) {
         return res.status(400).json({ success: false, error: 'Имя и email обязательны' });
       }
-      // const password_hash = await bcrypt.hash(password, 10);
 
       const updatedUser = await User.update(parseInt(req.params.id, 10), { name, email, password, age });
       if (!updatedUser) {
@@ -83,7 +81,7 @@ class UserController {
     try {
       const telegramId = Number(req.params.telegramId);
 
-      if (Number.isNaN(telegramId)) {
+      if (!telegramId) {
         return res.status(400).json({ message: 'Invalid telegram_id' });
       }
 
