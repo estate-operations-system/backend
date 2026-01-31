@@ -20,6 +20,7 @@ export default async function initDatabase() {
       id SERIAL PRIMARY KEY,
       category TEXT,
       description TEXT,
+      address TEXT,
       status TEXT DEFAULT 'Новая',
       resident_id INTEGER REFERENCES users(id),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

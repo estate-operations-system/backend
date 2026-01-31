@@ -13,6 +13,40 @@ const router = Router();
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Ticket:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           example: 1
+ *         title:
+ *           type: string
+ *           example: "Проблема с логином"
+ *         description:
+ *           type: string
+ *           example: "Не могу войти в аккаунт"
+ *         status:
+ *           type: string
+ *           example: "open"
+ *           enum: [open, in_progress, closed]
+ *         created_at:
+ *           type: string
+ *           format: date-time
+ *           example: "2024-01-15T10:30:00Z"
+ *         updated_at:
+ *           type: string
+ *           format: date-time
+ *           example: "2024-01-15T11:30:00Z"
+ *       required:
+ *         - id
+ *         - title
+ *         - status
+ */
+
+/**
+ * @swagger
  * /api/tickets:
  *   post:
  *     summary: Создать заявку
