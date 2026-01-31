@@ -10,7 +10,8 @@ export default async function initDatabase() {
       telegram_id BIGINT UNIQUE,
       password TEXT NOT NULL,
       telegram_username TEXT NOT NULL,
-      role TEXT DEFAULT 'resident'
+      role TEXT DEFAULT 'resident',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
@@ -26,5 +27,5 @@ export default async function initDatabase() {
   `);
 
   client.release();
-  console.log('✅ БД инициализирована');
+  console.log('БД инициализирована');
 }

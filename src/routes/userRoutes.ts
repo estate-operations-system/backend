@@ -54,6 +54,10 @@ router.get('/', UserController.getAllUsers);
  *       200:
  *         description: Пользователи с пагинацией
  */
+router.get(
+  '/by-telegram/:telegramId',
+  UserController.getByTelegramId
+);
 router.get('/paginated', UserController.getUsersPaginated);
 
 /**
@@ -139,5 +143,6 @@ router.patch('/:id', UserController.updateUser);
  *         description: Пользователь удалён
  */
 router.delete('/:id', UserController.deleteUser);
+
 
 export default router;

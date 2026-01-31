@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import bcrypt from 'bcrypt';
 import User from '../models/userModel';
 
 class UserController {
@@ -34,18 +35,16 @@ class UserController {
 
   static async createUser(req: Request, res: Response) {
     try {
-      const { name, email, age } = req.body;
-
-      if (!name || !email) {
-        return res.status(400).json({ success: false, error: 'Имя и email обязательны' });
+      const { name, telegram_id, telegram_username, password } = req.body;
+      if (!name || !telegram_id) {
+        return res.status(400).json({ success: false, error: 'Имя и telegram_id обязательны' });
       }
-
-      const existingUser = await User.findByEmail(email);
+      const existingUser = await User.findByTelegramId(telegram_id);
       if (existingUser) {
-        return res.status(409).json({ success: false, error: 'Пользователь с таким email уже существует' });
+        return res.status(409).json({ success: false, error: 'Пользователь с таким telegram id уже существует' });
       }
-
-      const newUser = await User.create({ name, email, age });
+      // TODO: add hashing later
+      const newUser = await User.create({ name, telegram_id, telegram_username, password });
       res.status(201).json({ success: true, message: 'Пользователь создан', data: newUser });
     } catch (error: any) {
       console.error('Ошибка при создании пользователя:', error);
@@ -53,20 +52,20 @@ class UserController {
       if (error.code === '23505') { 
         return res.status(409).json({ success: false, error: 'Пользователь с таким email уже существует' });
       }
-
+      console.error('Ошибка при создании пользователя:', error);
       res.status(500).json({ success: false, error: 'Ошибка сервера' });
     }
   }
 
   static async updateUser(req: Request, res: Response) {
     try {
-      const { name, email, age } = req.body;
+      const { name, email, password, age } = req.body;
 
       if (!name || !email) {
         return res.status(400).json({ success: false, error: 'Имя и email обязательны' });
       }
 
-      const updatedUser = await User.update(parseInt(req.params.id, 10), { name, email, age });
+      const updatedUser = await User.update(parseInt(req.params.id, 10), { name, email, password, age });
       if (!updatedUser) {
         return res.status(404).json({ success: false, error: 'Пользователь не найден' });
       }
@@ -75,6 +74,27 @@ class UserController {
     } catch (error) {
       console.error('Ошибка при обновлении пользователя:', error);
       res.status(500).json({ success: false, error: 'Ошибка сервера' });
+    }
+  }
+
+  static async getByTelegramId(req: Request, res: Response) {
+    try {
+      const telegramId = Number(req.params.telegramId);
+
+      if (!telegramId) {
+        return res.status(400).json({ message: 'Invalid telegram_id' });
+      }
+
+      const user = await User.findByTelegramId(telegramId);
+
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      res.json({ success: true, data: user });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
     }
   }
 
