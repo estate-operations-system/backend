@@ -18,7 +18,7 @@ class User {
 
   static async findById(id: number): Promise<IUser | null> {
     const result = await pool.query(
-      'SELECT id, name, email, age, created_at FROM users WHERE id = $1',
+      'SELECT id, name, telegram_username, role, password, created_at FROM users WHERE id = $1',
       [id]
     );
     return result.rows[0] || null;

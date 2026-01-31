@@ -54,5 +54,6 @@ router.get('/', async (_req: Request, res: Response) => {
     res.status(500).json({ success: false, error: 'Ошибка сервера' });
   }
 });
+router.get('/:id', TicketController.getTicketById);
 
 export default router;

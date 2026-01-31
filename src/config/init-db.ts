@@ -7,11 +7,10 @@ export default async function initDatabase() {
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       name TEXT NOT NULL,
-      email TEXT UNIQUE,
-      age INTEGER CHECK (age >= 0),
       telegram_id BIGINT UNIQUE,
-      role TEXT DEFAULT 'resident',
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      password TEXT NOT NULL,
+      telegram_username TEXT NOT NULL,
+      role TEXT DEFAULT 'resident'
     )
   `);
 
@@ -20,7 +19,6 @@ export default async function initDatabase() {
       id SERIAL PRIMARY KEY,
       category TEXT,
       description TEXT,
-      address TEXT,
       status TEXT DEFAULT 'Новая',
       resident_id INTEGER REFERENCES users(id),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
