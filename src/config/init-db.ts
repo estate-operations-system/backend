@@ -22,7 +22,7 @@ export default async function initDatabase() {
       description TEXT,
       address TEXT,
       status TEXT DEFAULT 'Новая',
-      resident_id INTEGER REFERENCES users(id),
+      resident_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
