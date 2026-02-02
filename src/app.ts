@@ -28,6 +28,10 @@ app.get('/', (_req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/tickets', ticketRoutes);
 
+app.get('/v3/api-docs', (_, res) => {
+  res.json(swaggerSpec)
+})
+
 app.use((_req, res) => {
   res.status(404).json({ success: false, error: 'Маршрут не найден' });
 });
