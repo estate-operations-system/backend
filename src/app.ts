@@ -1,4 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
@@ -12,6 +14,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use((req: Request, _res: Response, next: NextFunction) => {
   console.log(`${req.method} ${req.url}`);
@@ -24,6 +27,10 @@ app.get('/', (_req, res) => {
 
 app.use('/api/users', userRoutes);
 app.use('/api/tickets', ticketRoutes);
+
+app.get('/v3/api-docs', (_, res) => {
+  res.json(swaggerSpec)
+})
 
 app.use((_req, res) => {
   res.status(404).json({ success: false, error: 'Маршрут не найден' });

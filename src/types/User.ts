@@ -1,7 +1,8 @@
 export interface User {
-  id: number;
+  id?: number;
   name: string;
-  email?: string;
-  telegram_id?: number;
-  role: 'resident' | 'admin' | 'executor';
+  password: string;
+  telegram_id: string;
+  telegram_username: string;
+  created_at?: Date;
 }

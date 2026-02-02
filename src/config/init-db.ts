@@ -7,8 +7,6 @@ export default async function initDatabase() {
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       name TEXT NOT NULL,
-      email TEXT UNIQUE,
-      age INTEGER CHECK (age >= 0),
       telegram_id BIGINT UNIQUE,
       password TEXT NOT NULL,
       telegram_username TEXT NOT NULL,
@@ -24,7 +22,7 @@ export default async function initDatabase() {
       description TEXT,
       address TEXT,
       status TEXT DEFAULT 'Новая',
-      resident_id INTEGER REFERENCES users(id),
+      resident_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
