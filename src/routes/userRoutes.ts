@@ -19,107 +19,40 @@ const router = Router();
  *       properties:
  *         id:
  *           type: integer
- *           example: 1
  *         name:
  *           type: string
- *           example: "Иван Иванов"
  *         password:
  *           type: string
- *           example: "hashed_password_123"
  *         telegram_id:
- *           type: integer
- *           example: 123456789
+ *           type: string
  *         telegram_username:
  *           type: string
- *           example: "@ivanov"
  *         created_at:
  *           type: string
  *           format: date-time
- *           example: "2024-01-15T10:30:00Z"
+ * 
  *     UserCreate:
  *       type: object
- *       required:
- *         - name
- *         - telegram_id
  *       properties:
  *         name:
  *           type: string
- *           example: "Иван Иванов"
  *         telegram_id:
- *           type: integer
- *           example: 123456789
+ *           type: string
  *         telegram_username:
  *           type: string
- *           example: "@ivanov"
  *         password:
  *           type: string
- *           example: "password123"
+ *       required:
+ *         - name
+ *         - telegram_id
+ * 
  *     UserUpdate:
  *       type: object
  *       properties:
  *         name:
  *           type: string
- *           example: "Иван Иванов (обновленный)"
  *         password:
  *           type: string
- *           example: "new_password_123"
- * 
- *   parameters:
- *     userId:
- *       in: path
- *       name: id
- *       required: true
- *       schema:
- *         type: integer
- *       description: ID пользователя
- *     telegramId:
- *       in: path
- *       name: telegramId
- *       required: true
- *       schema:
- *         type: integer
- *       description: Telegram ID пользователя
- * 
- *   responses:
- *     UserNotFound:
- *       description: Пользователь не найден
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               success:
- *                 type: boolean
- *                 example: false
- *               error:
- *                 type: string
- *                 example: "Пользователь не найден"
- *     UserExists:
- *       description: Пользователь уже существует
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               success:
- *                 type: boolean
- *                 example: false
- *               error:
- *                 type: string
- *                 example: "Пользователь с таким telegram id уже существует"
- *     BadRequest:
- *       description: Неверные параметры запроса
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               success:
- *                 type: boolean
- *                 example: false
- *               error:
- *                 type: string
- *                 example: "Имя и telegram_id обязательны"
  */
 
 /**
@@ -136,37 +69,11 @@ const router = Router();
  *             $ref: '#/components/schemas/UserCreate'
  *     responses:
  *       200:
- *         description: Пользователь успешно создан
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: "Пользователь создан"
- *                 data:
- *                   $ref: '#/components/schemas/User'
- *       400:
- *         $ref: '#/components/responses/BadRequest'
+ *         description: Пользователь создан
  *       409:
- *         $ref: '#/components/responses/UserExists'
+ *         description: Пользователь уже существует
  *       500:
  *         description: Ошибка сервера
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   example: "Ошибка сервера при создании пользователя"
  */
 router.post('/', UserController.createUser);
 
@@ -179,34 +86,8 @@ router.post('/', UserController.createUser);
  *     responses:
  *       200:
  *         description: Список пользователей
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 count:
- *                   type: integer
- *                   example: 10
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/User'
  *       500:
  *         description: Ошибка сервера
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   example: "Ошибка сервера при получении пользователей"
  */
 router.get('/', UserController.getAllUsers);
 
@@ -217,35 +98,18 @@ router.get('/', UserController.getAllUsers);
  *     summary: Получить пользователя по ID
  *     tags: [Users]
  *     parameters:
- *       - $ref: '#/components/parameters/userId'
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
  *         description: Пользователь найден
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/User'
  *       404:
- *         $ref: '#/components/responses/UserNotFound'
+ *         description: Пользователь не найден
  *       500:
  *         description: Ошибка сервера
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   example: "Ошибка сервера при получении пользователя по id"
  */
 router.get('/:id', UserController.getUserById);
 
@@ -256,40 +120,18 @@ router.get('/:id', UserController.getUserById);
  *     summary: Получить пользователя по Telegram ID
  *     tags: [Users]
  *     parameters:
- *       - $ref: '#/components/parameters/telegramId'
+ *       - in: path
+ *         name: telegramId
+ *         required: true
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: Пользователь найден
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/User'
  *       404:
  *         description: Пользователь не найден
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Пользователь не найден"
  *       500:
  *         description: Ошибка сервера
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Ошибка сервера при получении пользователя по telegram_id"
  */
 router.get('/telegram/:telegramId', UserController.getUserByTelegramId);
 
@@ -300,7 +142,11 @@ router.get('/telegram/:telegramId', UserController.getUserByTelegramId);
  *     summary: Обновить пользователя
  *     tags: [Users]
  *     parameters:
- *       - $ref: '#/components/parameters/userId'
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
  *     requestBody:
  *       required: true
  *       content:
@@ -309,35 +155,11 @@ router.get('/telegram/:telegramId', UserController.getUserByTelegramId);
  *             $ref: '#/components/schemas/UserUpdate'
  *     responses:
  *       200:
- *         description: Пользователь успешно обновлен
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: "Пользователь обновлен"
- *                 data:
- *                   $ref: '#/components/schemas/User'
+ *         description: Пользователь обновлен
  *       404:
- *         $ref: '#/components/responses/UserNotFound'
+ *         description: Пользователь не найден
  *       500:
  *         description: Ошибка сервера
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   example: "Ошибка сервера при обновлении пользователя"
  */
 router.put('/:id', UserController.updateUser);
 
@@ -348,42 +170,18 @@ router.put('/:id', UserController.updateUser);
  *     summary: Удалить пользователя
  *     tags: [Users]
  *     parameters:
- *       - $ref: '#/components/parameters/userId'
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
- *         description: Пользователь успешно удален
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: "Пользователь удален"
- *                 data:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: integer
- *                       example: 1
+ *         description: Пользователь удален
  *       404:
- *         $ref: '#/components/responses/UserNotFound'
+ *         description: Пользователь не найден
  *       500:
  *         description: Ошибка сервера
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   example: "Ошибка сервера при удалении пользователя"
  */
 router.delete('/:id', UserController.deleteUser);
 

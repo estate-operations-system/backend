@@ -3,12 +3,12 @@ import { Ticket } from '../types/Ticket';
 
 class TicketModel {
   static async create(ticketData: Ticket): Promise<Ticket> {
-    const { category, description, address, resident_id } = ticketData;
+    const { category, description, address, status, resident_id } = ticketData;
     const result = await pool.query(
-      `INSERT INTO tickets (category, description, address, resident_id)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO tickets (category, description, address, status, resident_id)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [category, description, address, resident_id]
+      [category, description, address, status, resident_id]
     );
     return result.rows[0];
   }

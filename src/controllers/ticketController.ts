@@ -4,16 +4,17 @@ import Ticket from '../models/ticketModel';
 class TicketController {
   static async createTicket(req: Request, res: Response) {
     try {
-      const { category, description, address, resident_id } = req.body;
+      const { category, description, address, status, resident_id } = req.body;
 
-      if (!category || !description || !resident_id) {
-        return res.status(400).json({success: false,error: 'category, description и resident_id обязательны'});
+      if (!category || !address || !status || !resident_id) {
+        return res.status(400).json({success: false,error: 'category, address, status и resident_id обязательны'});
       }
 
       const newTicket = await Ticket.create({
         category,
         description,
         address,
+        status,
         resident_id
       });
 

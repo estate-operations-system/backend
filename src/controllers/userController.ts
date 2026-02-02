@@ -67,14 +67,14 @@ class UserController {
 
   static async updateUser(req: Request, res: Response) {
     try {
-      const { name, password } = req.body;
+      const { name, telegram_id, telegram_username, password } = req.body;
 
       const user = await User.findById(parseInt(req.params.id, 10));
       if (!user) {
         return res.status(404).json({success: false, error: 'Пользователь не найден' });
       }
 
-      const updatedUser = await User.update(parseInt(req.params.id, 10), { name, password });
+      const updatedUser = await User.update(parseInt(req.params.id, 10), { name, telegram_id, telegram_username, password });
 
       res.json({ success: true, message: 'Пользователь обновлен', data: updatedUser });
     } catch (error) {

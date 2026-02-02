@@ -19,88 +19,56 @@ const router = Router();
  *       properties:
  *         id:
  *           type: integer
- *           example: 1
  *         category:
  *           type: string
- *           example: "Сантехника"
  *         description:
  *           type: string
- *           example: "Протекает кран на кухне"
  *         address:
  *           type: string
- *           example: "ул. Ленина, 10, кв. 25"
  *         status:
  *           type: string
- *           example: "open"
  *         resident_id:
  *           type: integer
- *           example: 123
  *         created_at:
  *           type: string
  *           format: date-time
- *           example: "2024-01-15T10:30:00Z"
+ *       required:
+ *         - id
+ *         - category
+ *         - address
+ *         - status
+ *         - resident_id
+ * 
  *     TicketCreate:
  *       type: object
- *       required:
- *         - category
- *         - description
- *         - resident_id
  *       properties:
  *         category:
  *           type: string
- *           example: "Сантехника"
  *         description:
  *           type: string
- *           example: "Протекает кран на кухне"
  *         address:
  *           type: string
- *           example: "ул. Ленина, 10, кв. 25"
+ *         status:
+ *           type: string
  *         resident_id:
  *           type: integer
- *           example: 123
+ *       required:
+ *         - category
+ *         - address
+ *         - status
+ *         - resident_id
+ * 
  *     TicketUpdate:
  *       type: object
  *       properties:
  *         category:
  *           type: string
- *           example: "Сантехника"
  *         description:
  *           type: string
- *           example: "Протекает кран на кухне"
  *         address:
  *           type: string
- *           example: "ул. Ленина, 10, кв. 25"
  *         status:
  *           type: string
- *           example: "in_progress"
- * 
- *   responses:
- *     NotFound:
- *       description: Ресурс не найден
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               success:
- *                 type: boolean
- *                 example: false
- *               error:
- *                 type: string
- *                 example: "Заявка не найдена"
- *     BadRequest:
- *       description: Неверные параметры запроса
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               success:
- *                 type: boolean
- *                 example: false
- *               error:
- *                 type: string
- *                 example: "category, description и resident_id обязательны"
  */
 
 /**
@@ -117,19 +85,9 @@ const router = Router();
  *             $ref: '#/components/schemas/TicketCreate'
  *     responses:
  *       201:
- *         description: Заявка успешно создана
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/Ticket'
+ *         description: Заявка создана
  *       400:
- *         $ref: '#/components/responses/BadRequest'
+ *         description: Неверные данные
  *       500:
  *         description: Ошибка сервера
  */
@@ -144,18 +102,6 @@ router.post('/', TicketController.createTicket);
  *     responses:
  *       200:
  *         description: Список заявок
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Ticket'
  *       500:
  *         description: Ошибка сервера
  */
@@ -173,24 +119,11 @@ router.get('/', TicketController.getAllTickets);
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID заявки
  *     responses:
  *       200:
  *         description: Заявка найдена
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/Ticket'
- *       400:
- *         description: Неверный ID
  *       404:
- *         $ref: '#/components/responses/NotFound'
+ *         description: Заявка не найдена
  *       500:
  *         description: Ошибка сервера
  */
@@ -208,7 +141,6 @@ router.get('/:id', TicketController.getTicketById);
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID заявки
  *     requestBody:
  *       required: true
  *       content:
@@ -217,24 +149,9 @@ router.get('/:id', TicketController.getTicketById);
  *             $ref: '#/components/schemas/TicketUpdate'
  *     responses:
  *       200:
- *         description: Заявка успешно обновлена
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 data:
- *                   $ref: '#/components/schemas/Ticket'
- *                 message:
- *                   type: string
- *                   example: "Заявка успешно обновлена"
- *       400:
- *         description: Неверные данные
+ *         description: Заявка обновлена
  *       404:
- *         $ref: '#/components/responses/NotFound'
+ *         description: Заявка не найдена
  *       500:
  *         description: Ошибка сервера
  */
@@ -252,25 +169,11 @@ router.put('/:id', TicketController.updateTicket);
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID заявки
  *     responses:
  *       200:
- *         description: Заявка успешно удалена
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: "Заявка успешно удалена"
- *       400:
- *         description: Неверный ID
+ *         description: Заявка удалена
  *       404:
- *         $ref: '#/components/responses/NotFound'
+ *         description: Заявка не найдена
  *       500:
  *         description: Ошибка сервера
  */
