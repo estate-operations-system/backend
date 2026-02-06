@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon --exec ts-node src/server.ts",
     "build": "tsc",
-    "start": "ts-node dist/server.ts",
+    "start": "node dist/server.js",
     "db:init": "ts-node src/config/init-db.ts",
     "db:reset": "ts-node src/config/reset-db.ts",
     "test": "jest"
