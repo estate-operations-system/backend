@@ -27,6 +27,7 @@ const router = Router();
  *           type: string
  *         status:
  *           type: string
+ *           enum: [Новая, Назначена, Выполняется, На проверке, Закрыта, Отменена]
  *         resident_id:
  *           type: integer
  *         created_at:
@@ -50,6 +51,7 @@ const router = Router();
  *           type: string
  *         status:
  *           type: string
+ *           enum: [Новая, Назначена, Выполняется, На проверке, Закрыта, Отменена]
  *         resident_id:
  *           type: integer
  *       required:
@@ -69,6 +71,7 @@ const router = Router();
  *           type: string
  *         status:
  *           type: string
+ *           enum: [Новая, Назначена, Выполняется, На проверке, Закрыта, Отменена]
  */
 
 /**
