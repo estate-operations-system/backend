@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import initDatabase from './config/init-db';
 import userRoutes from './routes/userRoutes';
 import ticketRoutes from './routes/ticketRoutes';
+import authRoutes from './routes/authRoutes';
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.get('/', (_req, res) => {
   res.json({ message: 'API работает' });
 });
 
+app.use('/api', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/tickets', ticketRoutes);
 
