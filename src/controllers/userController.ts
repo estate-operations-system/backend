@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import User from '../models/userModel';
-import { sendLoginCode } from '../services/telegramService';
 
 class UserController {
   static async createUser(req: Request, res: Response) {
