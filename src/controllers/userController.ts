@@ -201,7 +201,17 @@ class UserController {
 
     const data = req.query as unknown as TelegramAuthData;
 
-    const isValid = checkTelegramAuth(data, process.env.BOT_TOKEN!);
+    const formattedData = {
+      id: String(data.id),
+      first_name: String(data.first_name ?? ""),
+      last_name: String(data.last_name ?? ""),
+      username: String(data.username ?? ""),
+      photo_url: String(data.photo_url ?? ""),
+      auth_date: String(data.auth_date),
+      hash: String(data.hash)
+    };
+
+    const isValid = checkTelegramAuth(formattedData, process.env.BOT_TOKEN!);
 
     if (!isValid) {
       return res.status(403).json({ error: "Invalid telegram auth" });
