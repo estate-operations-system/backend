@@ -4,12 +4,14 @@ import { User } from '../types/User';
 class UserModel {
   static async create(userData: User): Promise<User> {
     const { name, password, telegram_id, telegram_username } = userData;
+
     const result = await pool.query(
       `INSERT INTO users (name, password, telegram_id, telegram_username)
-       VALUES ($1, $2, $3, $4)
-       RETURNING *`,
-      [name, password, telegram_id, telegram_username]
+      VALUES ($1, $2, $3, $4)
+      RETURNING *`,
+      [name, password ?? null, telegram_id, telegram_username]
     );
+
     return result.rows[0];
   }
 
