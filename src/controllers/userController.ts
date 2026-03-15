@@ -211,7 +211,7 @@ class UserController {
 
     if (!user) {
       user = await User.create({
-        name: data.first_name,
+        name: data.first_name + data.last_name,
         telegram_id: data.id,
         telegram_username: data.username || null,
         password: null
