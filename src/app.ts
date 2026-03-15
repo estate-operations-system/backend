@@ -8,6 +8,7 @@ import initDatabase from './config/init-db';
 import userRoutes from './routes/userRoutes';
 import ticketRoutes from './routes/ticketRoutes';
 import authRoutes from './routes/authRoutes';
+import session from "express-session";
 
 dotenv.config();
 
@@ -21,6 +22,14 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
+
+app.use(
+  session({
+    secret: "secret",
+    resave: false,
+    saveUninitialized: false
+  })
+);
 
 app.get('/', (_req, res) => {
   res.json({ message: 'API работает' });

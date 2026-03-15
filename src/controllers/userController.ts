@@ -1,5 +1,29 @@
 import { Request, Response } from 'express';
 import User from '../models/userModel';
+import crypto from "crypto";
+import { TelegramAuthData } from '../types/telegramData';
+
+function checkTelegramAuth(data: any, botToken: string): boolean {
+
+  const { hash, ...fields } = data;
+
+  const sorted = Object.keys(fields)
+    .sort()
+    .map(key => `${key}=${fields[key]}`)
+    .join('\n');
+
+  const secretKey = crypto
+    .createHash('sha256')
+    .update(botToken)
+    .digest();
+
+  const hmac = crypto
+    .createHmac('sha256', secretKey)
+    .update(sorted)
+    .digest('hex');
+
+  return hmac === hash;
+}
 
 class UserController {
   static async createUser(req: Request, res: Response) {
@@ -171,6 +195,32 @@ class UserController {
         error: 'Ошибка сервера'
       });
     }
+  }
+
+  static async telegramAuth(req: Request, res: Response) {
+
+    const data = req.query as unknown as TelegramAuthData;
+
+    const isValid = checkTelegramAuth(data, process.env.BOT_TOKEN!);
+
+    if (!isValid) {
+      return res.status(403).json({ error: "Invalid telegram auth" });
+    }
+
+    let user = await User.findByTelegramId(Number(data.id));
+
+    if (!user) {
+      user = await User.create({
+        name: data.first_name,
+        telegram_id: data.id,
+        telegram_username: data.username || null,
+        password: null
+      });
+    }
+
+    req.session.userId = user.id;
+
+    res.redirect("/api/users/me");
   }
 }
 
