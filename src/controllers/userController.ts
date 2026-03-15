@@ -98,6 +98,80 @@ class UserController {
       res.status(500).json({ success: false, error: 'Ошибка сервера при удалении пользователя' });
     }
   }
+
+  static async register(req: Request, res: Response) {
+    try {
+      const { name, telegram_id, telegram_username, password } = req.body;
+
+      const existingUser = await User.findByTelegramId(telegram_id);
+      if (existingUser) {
+        return res.status(409).json({ success: false, error: 'Пользователь с таким telegram id уже существует' });
+      }
+
+      const user = await User.create({
+        name, 
+        telegram_id, 
+        telegram_username, 
+        password
+      });
+
+      res.status(201).json({
+        success: true,
+        data: user
+      });
+
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Ошибка регистрации' });
+    }
+  }
+
+  static async login(req: Request, res: Response) {
+    try {
+      const { name, telegram_id, telegram_username, password } = req.body;
+
+      if (!telegram_id || !password) {
+        return res.status(400).json({
+          success: false,
+          error: 'telegram_id и password обязательны'
+        });
+      }
+
+      const user = await User.findByTelegramId(Number(telegram_id));
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          error: 'Пользователь не найден'
+        });
+      }
+
+      if (user.password !== password) {
+        return res.status(401).json({
+          success: false,
+          error: 'Неверный пароль'
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: 'Вход выполнен успешно',
+        data: {
+          id: user.id,
+          name: user.name,
+          telegram_username: user.telegram_username
+        }
+      });
+
+    } catch (error) {
+      console.error('Ошибка авторизации:', error);
+
+      res.status(500).json({
+        success: false,
+        error: 'Ошибка сервера'
+      });
+    }
+  }
 }
 
 export default UserController;
