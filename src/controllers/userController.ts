@@ -65,7 +65,19 @@ class UserController {
 
   static async getUserById(req: Request, res: Response) {
     try {
-      const user = await User.findById(parseInt(req.params.id, 10));
+      let userId: number | undefined;
+
+      if (req.params.id === "me") {
+        userId = Number(req.session?.userId);
+      } else if (req.params.id) {
+        userId = parseInt(req.params.id, 10);
+      }
+
+      if (!userId) {
+        return res.status(401).json({ success: false, error: "Пользователь не найден по id" });
+      }
+
+      const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({ success: false, error: 'Пользователь не найден' });
       }
@@ -199,7 +211,7 @@ class UserController {
 
   static async telegramAuth(req: Request, res: Response) {
 
-    const data = req.body as unknown as TelegramAuthData;
+    const data = req.query as unknown as TelegramAuthData;
 
     const formattedData = {
       id: String(data.id),
@@ -228,7 +240,7 @@ class UserController {
       });
     }
 
-    req.session.userId = user.id;
+    req.session.userId = Number(user.id);
 
     res.redirect("/api/users/me");
   }
