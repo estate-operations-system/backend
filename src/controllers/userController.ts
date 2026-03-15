@@ -4,22 +4,22 @@ import crypto from "crypto";
 import { TelegramAuthData } from '../types/telegramData';
 
 function checkTelegramAuth(data: any, botToken: string): boolean {
-
   const { hash, ...fields } = data;
 
-  const sorted = Object.keys(fields)
+  const decodedFields: Record<string, string> = {};
+  Object.keys(fields).forEach(key => {
+    decodedFields[key] = decodeURIComponent(fields[key] ?? "");
+  });
+
+  const dataCheckString = Object.keys(decodedFields)
     .sort()
-    .map(key => `${key}=${fields[key]}`)
+    .map(key => `${key}=${decodedFields[key]}`)
     .join('\n');
 
-  const secretKey = crypto
-    .createHash('sha256')
-    .update(botToken)
-    .digest();
+  const secretKey = crypto.createHash('sha256').update(botToken).digest();
 
-  const hmac = crypto
-    .createHmac('sha256', secretKey)
-    .update(sorted)
+  const hmac = crypto.createHmac('sha256', secretKey)
+    .update(dataCheckString)
     .digest('hex');
 
   return hmac === hash;
@@ -199,7 +199,7 @@ class UserController {
 
   static async telegramAuth(req: Request, res: Response) {
 
-    const data = req.query as unknown as TelegramAuthData;
+    const data = req.body as unknown as TelegramAuthData;
 
     const formattedData = {
       id: String(data.id),
