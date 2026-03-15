@@ -242,7 +242,7 @@ class UserController {
 
     req.session.userId = Number(user.id);
 
-    res.redirect("/api/users/me");
+    res.redirect("/profile");
   }
 }
 
