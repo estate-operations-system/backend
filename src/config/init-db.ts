@@ -27,6 +27,22 @@ export default async function initDatabase() {
     )
   `);
 
+  await client.query(`
+    CREATE TABLE IF NOT EXISTS vehicle_parking (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      license_plate TEXT NOT NULL,
+      vehicle_make TEXT,
+      vehicle_model TEXT,
+      vehicle_color TEXT,
+      parking_spot TEXT NOT NULL,
+      parking_zone TEXT,
+      comment TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   client.release();
   console.log('БД инициализирована');
 }
