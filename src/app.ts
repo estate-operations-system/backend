@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import initDatabase from './config/init-db';
 import userRoutes from './routes/userRoutes';
 import ticketRoutes from './routes/ticketRoutes';
+import vehicleParkingRoutes from './routes/vehicleParkingRoutes';
 import authRoutes from './routes/authRoutes';
 import session from "express-session";
 
@@ -38,6 +39,7 @@ app.get('/', (_req, res) => {
 app.use('/api', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/tickets', ticketRoutes);
+app.use('/api/vehicle-parking', vehicleParkingRoutes);
 
 app.get('/v3/api-docs', (_, res) => {
   res.json(swaggerSpec)
