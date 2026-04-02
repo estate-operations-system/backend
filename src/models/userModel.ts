@@ -16,25 +16,17 @@ class UserModel {
   }
 
   static async findAll(): Promise<User[]> {
-    const result = await pool.query(
-      'SELECT * FROM users ORDER BY id'
-    );
+    const result = await pool.query('SELECT * FROM users ORDER BY id');
     return result.rows;
   }
 
   static async findById(id: number): Promise<User | null> {
-    const result = await pool.query(
-      'SELECT * FROM users WHERE id = $1',
-      [id]
-    );
+    const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
     return result.rows[0] || null;
   }
 
   static async findByTelegramId(telegramId: number) {
-    const result = await pool.query(
-      `SELECT * FROM users WHERE telegram_id = $1`,
-      [telegramId]
-    );
+    const result = await pool.query(`SELECT * FROM users WHERE telegram_id = $1`, [telegramId]);
     return result.rows[0] || null;
   }
 
@@ -51,10 +43,7 @@ class UserModel {
   }
 
   static async delete(id: number): Promise<{ id: number } | null> {
-    const result = await pool.query(
-      'DELETE FROM users WHERE id = $1 RETURNING id',
-      [id]
-    );
+    const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING id', [id]);
     return result.rows[0] || null;
   }
 }

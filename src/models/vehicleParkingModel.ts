@@ -18,7 +18,16 @@ class VehicleParkingModel {
       `INSERT INTO vehicle_parking (user_id, license_plate, vehicle_make, vehicle_model, vehicle_color, parking_spot, parking_zone, comment)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
-      [user_id, license_plate, vehicle_make ?? null, vehicle_model ?? null, vehicle_color ?? null, parking_spot, parking_zone ?? null, comment ?? null]
+      [
+        user_id,
+        license_plate,
+        vehicle_make ?? null,
+        vehicle_model ?? null,
+        vehicle_color ?? null,
+        parking_spot,
+        parking_zone ?? null,
+        comment ?? null,
+      ]
     );
 
     return result.rows[0];
@@ -35,7 +44,10 @@ class VehicleParkingModel {
   }
 
   static async findByUserId(user_id: number): Promise<VehicleParking[]> {
-    const result = await pool.query('SELECT * FROM vehicle_parking WHERE user_id = $1 ORDER BY id', [user_id]);
+    const result = await pool.query(
+      'SELECT * FROM vehicle_parking WHERE user_id = $1 ORDER BY id',
+      [user_id]
+    );
     return result.rows;
   }
 
@@ -62,7 +74,16 @@ class VehicleParkingModel {
            updated_at = CURRENT_TIMESTAMP
        WHERE id = $8
        RETURNING *`,
-      [license_plate, vehicle_make ?? null, vehicle_model ?? null, vehicle_color ?? null, parking_spot, parking_zone ?? null, comment ?? null, id]
+      [
+        license_plate,
+        vehicle_make ?? null,
+        vehicle_model ?? null,
+        vehicle_color ?? null,
+        parking_spot,
+        parking_zone ?? null,
+        comment ?? null,
+        id,
+      ]
     );
 
     return result.rows[0] || null;

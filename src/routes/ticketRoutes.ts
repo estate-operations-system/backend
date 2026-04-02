@@ -39,7 +39,7 @@ const router = Router();
  *         - address
  *         - status
  *         - resident_id
- * 
+ *
  *     TicketCreate:
  *       type: object
  *       properties:
@@ -59,7 +59,7 @@ const router = Router();
  *         - address
  *         - status
  *         - resident_id
- * 
+ *
  *     TicketUpdate:
  *       type: object
  *       properties:

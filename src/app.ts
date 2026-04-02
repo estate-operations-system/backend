@@ -9,7 +9,7 @@ import userRoutes from './routes/userRoutes';
 import ticketRoutes from './routes/ticketRoutes';
 import vehicleParkingRoutes from './routes/vehicleParkingRoutes';
 import authRoutes from './routes/authRoutes';
-import session from "express-session";
+import session from 'express-session';
 
 dotenv.config();
 
@@ -26,9 +26,9 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 
 app.use(
   session({
-    secret: "secret",
+    secret: 'secret',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
   })
 );
 
@@ -42,8 +42,8 @@ app.use('/api/tickets', ticketRoutes);
 app.use('/api/vehicle-parking', vehicleParkingRoutes);
 
 app.get('/v3/api-docs', (_, res) => {
-  res.json(swaggerSpec)
-})
+  res.json(swaggerSpec);
+});
 
 app.use((_req, res) => {
   res.status(404).json({ success: false, error: 'Маршрут не найден' });

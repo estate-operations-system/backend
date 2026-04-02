@@ -5,21 +5,20 @@ dotenv.config();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || undefined,
-  ssl: process.env.DATABASE_URL
-    ? { rejectUnauthorized: false }  
-    : false,
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT),
   database: process.env.DB_NAME,
   user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD
+  password: process.env.DB_PASSWORD,
 });
 
-pool.connect()
-  .then(client => {
+pool
+  .connect()
+  .then((client) => {
     console.log('PostgreSQL подключен');
     client.release();
   })
-  .catch(err => console.error('Ошибка PostgreSQL', err));
+  .catch((err) => console.error('Ошибка PostgreSQL', err));
 
 export default pool;
