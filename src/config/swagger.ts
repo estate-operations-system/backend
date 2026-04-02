@@ -13,7 +13,7 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: process.env.BACKEND_SOURCE,
+        url: 'http://localhost:4000/',
       },
     ],
   },

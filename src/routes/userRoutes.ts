@@ -30,7 +30,7 @@ const router = Router();
  *         created_at:
  *           type: string
  *           format: date-time
- * 
+ *
  *     UserCreate:
  *       type: object
  *       properties:
@@ -45,7 +45,7 @@ const router = Router();
  *       required:
  *         - name
  *         - telegram_id
- * 
+ *
  *     UserUpdate:
  *       type: object
  *       properties:

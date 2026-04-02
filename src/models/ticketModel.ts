@@ -12,19 +12,14 @@ class TicketModel {
     );
     return result.rows[0];
   }
-  
+
   static async findAll(): Promise<Ticket[]> {
-    const result = await pool.query(
-      'SELECT * FROM tickets ORDER BY id'
-    );
+    const result = await pool.query('SELECT * FROM tickets ORDER BY id');
     return result.rows;
   }
 
   static async findById(id: number): Promise<Ticket | null> {
-    const result = await pool.query(
-      'SELECT * FROM tickets WHERE id = $1',
-      [id]
-    );
+    const result = await pool.query('SELECT * FROM tickets WHERE id = $1', [id]);
     return result.rows[0] || null;
   }
 
@@ -41,10 +36,7 @@ class TicketModel {
   }
 
   static async delete(id: number): Promise<{ id: number } | null> {
-    const result = await pool.query(
-      'DELETE FROM tickets WHERE id = $1 RETURNING id',
-      [id]
-    );
+    const result = await pool.query('DELETE FROM tickets WHERE id = $1 RETURNING id', [id]);
     return result.rows[0] || null;
   }
 }
