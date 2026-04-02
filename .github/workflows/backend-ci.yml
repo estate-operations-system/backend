@@ -6,14 +6,14 @@ on:
       - main
       - develop
     paths:
-      - '/**'
+      - './**'
       - '.github/workflows/backend-ci.yml'
   pull_request:
     branches:
       - main
       - develop
     paths:
-      - '/**'
+      - './**'
       - '.github/workflows/backend-ci.yml'
 
 jobs:
@@ -33,30 +33,30 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
+          cache-dependency-path: ./package-lock.json
 
       - name: Install dependencies
-        working-directory: backend
+        working-directory: ./
         run: npm ci
 
       - name: Type check
-        working-directory: backend
+        working-directory: ./
         run: npm run type-check
 
       - name: Lint code
-        working-directory: backend
+        working-directory: ./
         run: npm run lint
 
       - name: Check formatting
-        working-directory: backend
+        working-directory: ./
         run: npm run format:check
 
       - name: Build project
-        working-directory: backend
+        working-directory: ./
         run: npm run build
 
       - name: Run tests
-        working-directory: backend
+        working-directory: ./
         run: npm run test
 
   security:
@@ -71,14 +71,14 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
+          cache-dependency-path: .//package-lock.json
 
       - name: Install dependencies
-        working-directory: backend
+        working-directory: ./
         run: npm ci
 
       - name: Audit packages
-        working-directory: backend
+        working-directory: ./
         run: npm audit --audit-level=moderate
         continue-on-error: true
 
