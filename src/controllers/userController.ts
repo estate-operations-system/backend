@@ -293,7 +293,51 @@ class UserController {
 
     if (!user) {
       user = await User.create({
-        name: data.first_name + data.last_name,
+        name: (data.first_name || '') + ' ' + (data.last_name || ''),
+        telegram_id: data.id,
+        telegram_username: data.username || null,
+        password: null,
+      });
+    }
+
+    req.session.userId = Number(user.id);
+
+    res.json({
+      success: true,
+      authenticated: true,
+      data: {
+        id: user.id,
+        name: user.name,
+        telegram_id: user.telegram_id,
+        telegram_username: user.telegram_username,
+      },
+    });
+  }
+
+  static async telegramAuthPost(req: Request, res: Response) {
+    const data = req.body as TelegramAuthData;
+
+    const formattedData = {
+      id: String(data.id),
+      first_name: String(data.first_name ?? ''),
+      last_name: String(data.last_name ?? ''),
+      username: String(data.username ?? ''),
+      photo_url: String(data.photo_url ?? ''),
+      auth_date: String(data.auth_date),
+      hash: String(data.hash),
+    };
+
+    const isValid = checkTelegramAuth(formattedData, process.env.BOT_TOKEN!);
+
+    if (!isValid) {
+      return res.status(403).json({ error: 'Invalid telegram auth' });
+    }
+
+    let user = await User.findByTelegramId(Number(data.id));
+
+    if (!user) {
+      user = await User.create({
+        name: (data.first_name || '') + ' ' + (data.last_name || ''),
         telegram_id: data.id,
         telegram_username: data.username || null,
         password: null,
