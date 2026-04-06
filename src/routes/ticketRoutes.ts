@@ -1,7 +1,10 @@
 import { Router } from 'express';
 import TicketController from '../controllers/ticketController';
+import { requireAuth } from '../middleware/auth';
 
 const router = Router();
+
+router.use(requireAuth);
 
 /**
  * @swagger
