@@ -160,6 +160,8 @@ class UserController {
         password,
       });
 
+      req.session.userId = Number(user.id);
+
       res.status(201).json({
         success: true,
         data: user,
@@ -197,6 +199,8 @@ class UserController {
         });
       }
 
+      req.session.userId = Number(user.id);
+
       return res.json({
         success: true,
         message: 'Вход выполнен успешно',
@@ -213,6 +217,56 @@ class UserController {
         success: false,
         error: 'Ошибка сервера',
       });
+    }
+  }
+
+  static async authStatus(req: Request, res: Response) {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.json({ success: true, authenticated: false });
+      }
+
+      const user = await User.findById(userId);
+      if (!user) {
+        req.session.destroy(() => undefined);
+        return res.json({ success: true, authenticated: false });
+      }
+
+      return res.json({
+        success: true,
+        authenticated: true,
+        data: {
+          id: user.id,
+          name: user.name,
+          telegram_id: user.telegram_id,
+          telegram_username: user.telegram_username,
+        },
+      });
+    } catch (error) {
+      console.error('Ошибка при проверке статуса авторизации:', error);
+      res.status(500).json({ success: false, error: 'Ошибка сервера' });
+    }
+  }
+
+  static async logout(req: Request, res: Response) {
+    try {
+      if (!req.session) {
+        return res.json({ success: true, authenticated: false });
+      }
+
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Ошибка при выходе:', err);
+          return res.status(500).json({ success: false, error: 'Ошибка выхода' });
+        }
+
+        res.clearCookie('connect.sid');
+        return res.json({ success: true, authenticated: false });
+      });
+    } catch (error) {
+      console.error('Ошибка при выходе:', error);
+      res.status(500).json({ success: false, error: 'Ошибка сервера' });
     }
   }
 
@@ -248,7 +302,16 @@ class UserController {
 
     req.session.userId = Number(user.id);
 
-    res.redirect('/profile');
+    res.json({
+      success: true,
+      authenticated: true,
+      data: {
+        id: user.id,
+        name: user.name,
+        telegram_id: user.telegram_id,
+        telegram_username: user.telegram_username,
+      },
+    });
   }
 }
 
