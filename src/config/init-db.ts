@@ -8,12 +8,20 @@ export default async function initDatabase() {
       id SERIAL PRIMARY KEY,
       name TEXT NOT NULL,
       telegram_id BIGINT UNIQUE,
-      password TEXT NOT NULL,
-      telegram_username TEXT NOT NULL,
+      password TEXT,
+      telegram_username TEXT,
       role TEXT DEFAULT 'resident',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  await client.query(`
+    ALTER TABLE users ALTER COLUMN password DROP NOT NULL
+  `).catch(() => {});
+
+  await client.query(`
+    ALTER TABLE users ALTER COLUMN telegram_username DROP NOT NULL
+  `).catch(() => {});
 
   await client.query(`
     CREATE TABLE IF NOT EXISTS tickets (
