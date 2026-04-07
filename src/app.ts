@@ -21,6 +21,7 @@ app.use(
       'http://localhost:3000',
       'http://localhost:3001',
       'http://localhost:8000',
+      `http://estate-operations.ru`,
       'https://woolstapling-johnson-synergistically.ngrok-free.dev',
       /\.ngrok-free\.dev$/,
       /\.onrender\.com$/
@@ -44,7 +45,7 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: 'none',
-      secure: true, // Temporarily disable for testing
+      secure: false, // Temporarily disable for testing
     },
   })
 );
