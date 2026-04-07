@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import User from '../models/userModel';
 import crypto from 'crypto';
 import { TelegramAuthData } from '../types/telegramData';
+import jwt from 'jsonwebtoken';
+import { JWT_SECRET } from '../app';
 
 function checkTelegramAuth(data: any, botToken: string): boolean {
   const { hash, ...fields } = data;
@@ -222,51 +224,43 @@ class UserController {
 
   static async authStatus(req: Request, res: Response) {
     try {
-      const userId = req.session?.userId;
-      if (!userId) {
-        return res.json({ success: true, authenticated: false });
-      }
-
-      const user = await User.findById(userId);
+      const user = (req as any).user;
       if (!user) {
-        req.session.destroy(() => undefined);
+        console.log('❌ No user in token');
         return res.json({ success: true, authenticated: false });
       }
 
-      return res.json({
+      const dbUser = await User.findById(user.userId);
+      if (!dbUser) {
+        console.log('❌ User not found:', user.userId);
+        return res.json({ success: true, authenticated: false });
+      }
+
+      console.log('✅ User authenticated:', dbUser.id);
+      res.json({
         success: true,
         authenticated: true,
         data: {
-          id: user.id,
-          name: user.name,
-          telegram_id: user.telegram_id,
-          telegram_username: user.telegram_username,
-        },
+          id: dbUser.id,
+          name: dbUser.name,
+          telegram_id: dbUser.telegram_id,
+          telegram_username: dbUser.telegram_username,
+        }
       });
     } catch (error) {
-      console.error('Ошибка при проверке статуса авторизации:', error);
-      res.status(500).json({ success: false, error: 'Ошибка сервера' });
+      console.error('Auth status error:', error);
+      res.status(500).json({ success: false, error: 'Server error' });
     }
   }
 
   static async logout(req: Request, res: Response) {
     try {
-      if (!req.session) {
-        return res.json({ success: true, authenticated: false });
-      }
-
-      req.session.destroy((err) => {
-        if (err) {
-          console.error('Ошибка при выходе:', err);
-          return res.status(500).json({ success: false, error: 'Ошибка выхода' });
-        }
-
-        res.clearCookie('connect.sid');
-        return res.json({ success: true, authenticated: false });
-      });
+      // Для JWT logout происходит на клиенте (удаление токена)
+      // Здесь просто возвращаем успех
+      res.json({ success: true, authenticated: false });
     } catch (error) {
-      console.error('Ошибка при выходе:', error);
-      res.status(500).json({ success: false, error: 'Ошибка сервера' });
+      console.error('Logout error:', error);
+      res.status(500).json({ success: false, error: 'Server error' });
     }
   }
 
@@ -315,6 +309,11 @@ class UserController {
   }
 
   static async telegramAuthPost(req: Request, res: Response) {
+    console.log('Telegram auth POST:', {
+      body: req.body,
+      origin: req.headers.origin
+    });
+
     const data = req.body as TelegramAuthData;
 
     const formattedData = {
@@ -330,6 +329,7 @@ class UserController {
     const isValid = checkTelegramAuth(formattedData, process.env.BOT_TOKEN!);
 
     if (!isValid) {
+      console.log('❌ Invalid telegram auth');
       return res.status(403).json({ error: 'Invalid telegram auth' });
     }
 
@@ -342,13 +342,21 @@ class UserController {
         telegram_username: data.username || null,
         password: null,
       });
+      console.log('✅ Created new user:', user.id);
     }
 
-    req.session.userId = Number(user.id);
+    const token = jwt.sign(
+      { userId: user.id, telegram_id: user.telegram_id },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    console.log('✅ Generated JWT token for user:', user.id);
 
     res.json({
       success: true,
       authenticated: true,
+      token,
       data: {
         id: user.id,
         name: user.name,
