@@ -44,15 +44,20 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
+  console.log('Auth header:', authHeader);
+  console.log('Token:', token ? 'present' : 'missing');
+
   if (!token) {
     return res.status(401).json({ success: false, error: 'Access token required' });
   }
 
   jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
     if (err) {
+      console.log('JWT verify error:', err.message);
       return res.status(403).json({ success: false, error: 'Invalid token' });
     }
     (req as any).user = user;
+    console.log('JWT verified, user:', user);
     next();
   });
 }
@@ -62,9 +67,9 @@ app.get('/', (_req, res) => {
 });
 
 app.use('/api', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/tickets', ticketRoutes);
-app.use('/api/vehicle-parking', vehicleParkingRoutes);
+app.use('/api/users', authenticateToken, userRoutes);
+app.use('/api/tickets', authenticateToken, ticketRoutes);
+app.use('/api/vehicle-parking', authenticateToken, vehicleParkingRoutes);
 
 app.get('/v3/api-docs', (_, res) => {
   res.json(swaggerSpec);
