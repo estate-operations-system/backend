@@ -17,7 +17,14 @@ const app = express();
 
 app.use(
   cors({
-    origin: true,
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:8000',
+      'https://woolstapling-johnson-synergistically.ngrok-free.dev',
+      /\.ngrok-free\.dev$/,
+      /\.onrender\.com$/
+    ],
     credentials: true,
   })
 );
@@ -37,7 +44,7 @@ app.use(
     cookie: {
       httpOnly: true,
       sameSite: 'none',
-      secure: process.env.SESSION_COOKIE_SECURE === 'true' || process.env.NODE_ENV === 'production',
+      secure: true, // Temporarily disable for testing
     },
   })
 );
