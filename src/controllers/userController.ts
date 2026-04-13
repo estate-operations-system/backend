@@ -359,7 +359,7 @@ class UserController {
     const token = jwt.sign(
       { userId: user.id, telegram_id: user.telegram_id },
       JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: '1m' }
     );
 
     console.log('✅ Generated JWT token for user:', user.id);
