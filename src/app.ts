@@ -43,9 +43,22 @@ export const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 export function authenticateToken(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
+  const botTokenHeader = req.headers['x-bot-token'] || req.headers['bot-token'];
+  const botToken = typeof botTokenHeader === 'string' ? botTokenHeader : Array.isArray(botTokenHeader) ? botTokenHeader[0] : undefined;
 
   console.log('Auth header:', authHeader);
   console.log('Token:', token ? 'present' : 'missing');
+  console.log('Bot token header:', botToken ? 'present' : 'missing');
+
+  if (botToken) {
+    if (botToken === process.env.BOT_TOKEN) {
+      console.log('Bot token auth accepted');
+      return next();
+    }
+
+    console.log('Invalid bot token');
+    return res.status(403).json({ success: false, error: 'Invalid bot token' });
+  }
 
   if (!token) {
     return res.status(401).json({ success: false, error: 'Access token required' });

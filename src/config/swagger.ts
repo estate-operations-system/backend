@@ -13,7 +13,7 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:4000/',
+        url: 'https://backend-pl4x.onrender.com/',
       },
     ],
   },
