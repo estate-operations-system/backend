@@ -70,7 +70,7 @@ class UserController {
       let userId: number | undefined;
 
       if (req.params.id === 'me') {
-        userId = Number(req.session?.userId);
+        userId = (req as any).user?.userId ?? Number(req.session?.userId);
       } else if (req.params.id) {
         userId = parseInt(req.params.id, 10);
       }
@@ -162,10 +162,16 @@ class UserController {
         password,
       });
 
-      req.session.userId = Number(user.id);
+      const token = jwt.sign(
+        { userId: user.id, telegram_id: user.telegram_id },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
 
       res.status(201).json({
         success: true,
+        message: 'Регистрация выполнена успешно',
+        token,
         data: user,
       });
     } catch (err) {
@@ -201,11 +207,16 @@ class UserController {
         });
       }
 
-      req.session.userId = Number(user.id);
+      const token = jwt.sign(
+        { userId: user.id, telegram_id: user.telegram_id },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
 
       return res.json({
         success: true,
         message: 'Вход выполнен успешно',
+        token,
         data: {
           id: user.id,
           name: user.name,
