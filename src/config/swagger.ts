@@ -16,6 +16,28 @@ const options: swaggerJsdoc.Options = {
         url: 'https://backend-pl4x.onrender.com/',
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+        botToken: {
+          type: 'apiKey',
+          in: 'header',
+          name: 'x-bot-token',
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
+      },
+      {
+        botToken: [],
+      },
+    ],
   },
 
   apis: ['src/routes/*.ts'],
