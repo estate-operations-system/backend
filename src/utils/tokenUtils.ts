@@ -65,5 +65,8 @@ export function refreshAccessToken(refreshToken: string): TokenPair | null {
     return null;
   }
 
-  return generateTokens(payload);
+  // Удаляем exp и iat из payload, чтобы jwt.sign мог использовать expiresIn
+  const { exp, iat, ...cleanPayload } = payload as any;
+
+  return generateTokens(cleanPayload);
 }
