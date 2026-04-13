@@ -180,4 +180,43 @@ router.post('/auth/register', UserController.register);
  */
 router.post('/auth/login', UserController.login);
 
+/**
+ * @swagger
+ * /api/auth/refresh:
+ *   post:
+ *     summary: Обновить access token используя refresh token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Refresh token полученный при логине
+ *             required:
+ *               - refreshToken
+ *     responses:
+ *       200:
+ *         description: Новая пара токенов
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 token:
+ *                   type: string
+ *                 refreshToken:
+ *                   type: string
+ *       400:
+ *         description: Refresh token обязателен
+ *       401:
+ *         description: Невалидный или истекший refresh token
+ */
+router.post('/auth/refresh', UserController.refreshToken);
+
 export default router;

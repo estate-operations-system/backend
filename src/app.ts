@@ -3,13 +3,13 @@ import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import jwt from 'jsonwebtoken';
 
 import initDatabase from './config/init-db';
 import userRoutes from './routes/userRoutes';
 import ticketRoutes from './routes/ticketRoutes';
 import vehicleParkingRoutes from './routes/vehicleParkingRoutes';
 import authRoutes from './routes/authRoutes';
+import { verifyToken } from './utils/tokenUtils';
 
 dotenv.config();
 
@@ -64,15 +64,15 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
     return res.status(401).json({ success: false, error: 'Access token required' });
   }
 
-  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
-    if (err) {
-      console.log('JWT verify error:', err.message);
-      return res.status(403).json({ success: false, error: 'Invalid token' });
-    }
-    (req as any).user = user;
-    console.log('JWT verified, user:', user);
-    next();
-  });
+  const user = verifyToken(token);
+  if (!user) {
+    console.log('JWT verify error: Invalid or expired token');
+    return res.status(401).json({ success: false, error: 'Invalid or expired token' });
+  }
+
+  (req as any).user = user;
+  console.log('JWT verified, user:', user);
+  next();
 }
 
 app.get('/', (_req, res) => {
