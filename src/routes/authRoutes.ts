@@ -146,7 +146,7 @@ router.post('/auth/logout', UserController.logout);
  *       409:
  *         description: Пользователь уже существует
  */
-router.post('/register', UserController.register);
+router.post('/auth/register', UserController.register);
 
 /**
  * @swagger
@@ -178,6 +178,6 @@ router.post('/register', UserController.register);
  *       404:
  *         description: Пользователь не найден
  */
-router.post('/login', UserController.login);
+router.post('/auth/login', UserController.login);
 
 export default router;
