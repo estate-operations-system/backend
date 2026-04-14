@@ -2,8 +2,7 @@ import { Request, Response } from 'express';
 import User from '../models/userModel';
 import crypto from 'crypto';
 import { TelegramAuthData } from '../types/telegramData';
-import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from '../app';
+import { generateTokens } from '../utils/tokenUtils';
 
 function checkTelegramAuth(data: any, botToken: string): boolean {
   const { hash, ...fields } = data;
@@ -162,16 +161,20 @@ class UserController {
         password,
       });
 
-      const token = jwt.sign(
-        { userId: user.id, telegram_id: user.telegram_id },
-        JWT_SECRET,
-        { expiresIn: '24h' }
-      );
+      if (!user.id) {
+        return res.status(500).json({ error: 'Ошибка при создании пользователя' });
+      }
+
+      const { token, refreshToken } = generateTokens({
+        userId: user.id,
+        telegram_id: user.telegram_id,
+      });
 
       res.status(201).json({
         success: true,
         message: 'Регистрация выполнена успешно',
         token,
+        refreshToken,
         data: user,
       });
     } catch (err) {
@@ -207,16 +210,16 @@ class UserController {
         });
       }
 
-      const token = jwt.sign(
-        { userId: user.id, telegram_id: user.telegram_id },
-        JWT_SECRET,
-        { expiresIn: '24h' }
-      );
+      const { token, refreshToken } = generateTokens({
+        userId: user.id,
+        telegram_id: user.telegram_id,
+      });
 
       return res.json({
         success: true,
         message: 'Вход выполнен успешно',
         token,
+        refreshToken,
         data: {
           id: user.id,
           name: user.name,
@@ -237,17 +240,17 @@ class UserController {
     try {
       const user = (req as any).user;
       if (!user) {
-        console.log('❌ No user in token');
+        console.log('No user in token');
         return res.json({ success: true, authenticated: false });
       }
 
       const dbUser = await User.findById(user.userId);
       if (!dbUser) {
-        console.log('❌ User not found:', user.userId);
+        console.log('User not found:', user.userId);
         return res.json({ success: true, authenticated: false });
       }
 
-      console.log('✅ User authenticated:', dbUser.id);
+      console.log('User authenticated:', dbUser.id);
       res.json({
         success: true,
         authenticated: true,
@@ -256,7 +259,7 @@ class UserController {
           name: dbUser.name,
           telegram_id: dbUser.telegram_id,
           telegram_username: dbUser.telegram_username,
-        }
+        },
       });
     } catch (error) {
       console.error('Auth status error:', error);
@@ -271,6 +274,38 @@ class UserController {
       res.json({ success: true, authenticated: false });
     } catch (error) {
       console.error('Logout error:', error);
+      res.status(500).json({ success: false, error: 'Server error' });
+    }
+  }
+
+  static async refreshToken(req: Request, res: Response) {
+    try {
+      const { refreshToken } = req.body;
+
+      if (!refreshToken) {
+        return res.status(400).json({
+          success: false,
+          error: 'Refresh token is required',
+        });
+      }
+
+      const { refreshAccessToken } = await import('../utils/tokenUtils');
+      const tokens = refreshAccessToken(refreshToken);
+
+      if (!tokens) {
+        return res.status(401).json({
+          success: false,
+          error: 'Invalid or expired refresh token',
+        });
+      }
+
+      res.json({
+        success: true,
+        token: tokens.token,
+        refreshToken: tokens.refreshToken,
+      });
+    } catch (error) {
+      console.error('Token refresh error:', error);
       res.status(500).json({ success: false, error: 'Server error' });
     }
   }
@@ -305,11 +340,16 @@ class UserController {
       });
     }
 
-    req.session.userId = Number(user.id);
+    const { token, refreshToken } = generateTokens({
+      userId: user.id,
+      telegram_id: user.telegram_id,
+    });
 
     res.json({
       success: true,
       authenticated: true,
+      token,
+      refreshToken,
       data: {
         id: user.id,
         name: user.name,
@@ -322,7 +362,7 @@ class UserController {
   static async telegramAuthPost(req: Request, res: Response) {
     console.log('Telegram auth POST:', {
       body: req.body,
-      origin: req.headers.origin
+      origin: req.headers.origin,
     });
 
     const data = req.body as TelegramAuthData;
@@ -340,7 +380,7 @@ class UserController {
     const isValid = checkTelegramAuth(formattedData, process.env.BOT_TOKEN!);
 
     if (!isValid) {
-      console.log('❌ Invalid telegram auth');
+      console.log('Invalid telegram auth');
       return res.status(403).json({ error: 'Invalid telegram auth' });
     }
 
@@ -353,21 +393,21 @@ class UserController {
         telegram_username: data.username || null,
         password: null,
       });
-      console.log('✅ Created new user:', user.id);
+      console.log('Created new user:', user.id);
     }
 
-    const token = jwt.sign(
-      { userId: user.id, telegram_id: user.telegram_id },
-      JWT_SECRET,
-      { expiresIn: '1m' }
-    );
+    const { token, refreshToken } = generateTokens({
+      userId: user.id,
+      telegram_id: user.telegram_id,
+    });
 
-    console.log('✅ Generated JWT token for user:', user.id);
+    console.log('Generated JWT token for user:', user.id);
 
     res.json({
       success: true,
       authenticated: true,
       token,
+      refreshToken,
       data: {
         id: user.id,
         name: user.name,
