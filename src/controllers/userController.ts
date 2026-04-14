@@ -259,7 +259,7 @@ class UserController {
           name: dbUser.name,
           telegram_id: dbUser.telegram_id,
           telegram_username: dbUser.telegram_username,
-        }
+        },
       });
     } catch (error) {
       console.error('Auth status error:', error);
@@ -362,7 +362,7 @@ class UserController {
   static async telegramAuthPost(req: Request, res: Response) {
     console.log('Telegram auth POST:', {
       body: req.body,
-      origin: req.headers.origin
+      origin: req.headers.origin,
     });
 
     const data = req.body as TelegramAuthData;

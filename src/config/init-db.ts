@@ -15,13 +15,21 @@ export default async function initDatabase() {
     )
   `);
 
-  await client.query(`
+  await client
+    .query(
+      `
     ALTER TABLE users ALTER COLUMN password DROP NOT NULL
-  `).catch(() => {});
+  `
+    )
+    .catch(() => {});
 
-  await client.query(`
+  await client
+    .query(
+      `
     ALTER TABLE users ALTER COLUMN telegram_username DROP NOT NULL
-  `).catch(() => {});
+  `
+    )
+    .catch(() => {});
 
   await client.query(`
     CREATE TABLE IF NOT EXISTS tickets (

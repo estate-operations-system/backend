@@ -5,7 +5,12 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   const botTokenHeader = req.headers['x-bot-token'] || req.headers['bot-token'];
-  const botToken = typeof botTokenHeader === 'string' ? botTokenHeader : Array.isArray(botTokenHeader) ? botTokenHeader[0] : undefined;
+  const botToken =
+    typeof botTokenHeader === 'string'
+      ? botTokenHeader
+      : Array.isArray(botTokenHeader)
+        ? botTokenHeader[0]
+        : undefined;
 
   if (botToken) {
     if (botToken === process.env.BOT_TOKEN) {

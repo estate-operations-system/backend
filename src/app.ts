@@ -24,7 +24,7 @@ app.use(
       `http://estate-operations.ru`,
       'https://woolstapling-johnson-synergistically.ngrok-free.dev',
       /\.ngrok-free\.dev$/,
-      /\.onrender\.com$/
+      /\.onrender\.com$/,
     ],
     credentials: true,
   })
@@ -44,7 +44,12 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   const botTokenHeader = req.headers['x-bot-token'] || req.headers['bot-token'];
-  const botToken = typeof botTokenHeader === 'string' ? botTokenHeader : Array.isArray(botTokenHeader) ? botTokenHeader[0] : undefined;
+  const botToken =
+    typeof botTokenHeader === 'string'
+      ? botTokenHeader
+      : Array.isArray(botTokenHeader)
+        ? botTokenHeader[0]
+        : undefined;
 
   console.log('Auth header:', authHeader);
   console.log('Token:', token ? 'present' : 'missing');
