@@ -37,7 +37,6 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
-// JWT Middleware
 export const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 export function authenticateToken(req: Request, res: Response, next: NextFunction) {

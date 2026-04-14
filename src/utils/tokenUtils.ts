@@ -15,8 +15,8 @@ export interface TokenPair {
 
 /**
  * Генерирует пару токенов (access + refresh)
- * Access token: 15 минут
- * Refresh token: 7 дней
+ * Access token: 1 минута
+ * Refresh token: 1 час
  */
 export function generateTokens(payload: TokenPayload): TokenPair {
   const token = jwt.sign(payload, JWT_SECRET, {
@@ -24,7 +24,7 @@ export function generateTokens(payload: TokenPayload): TokenPair {
   });
 
   const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
-    expiresIn: '7d',
+    expiresIn: '1h',
   });
 
   return { token, refreshToken };

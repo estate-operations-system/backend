@@ -60,5 +60,5 @@ export default async function initDatabase() {
   `);
 
   client.release();
-  console.log('БД инициализирована');
+  console.log('DB is initializer correctly!');
 }

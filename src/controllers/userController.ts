@@ -240,17 +240,17 @@ class UserController {
     try {
       const user = (req as any).user;
       if (!user) {
-        console.log('❌ No user in token');
+        console.log('No user in token');
         return res.json({ success: true, authenticated: false });
       }
 
       const dbUser = await User.findById(user.userId);
       if (!dbUser) {
-        console.log('❌ User not found:', user.userId);
+        console.log('User not found:', user.userId);
         return res.json({ success: true, authenticated: false });
       }
 
-      console.log('✅ User authenticated:', dbUser.id);
+      console.log('User authenticated:', dbUser.id);
       res.json({
         success: true,
         authenticated: true,
@@ -380,7 +380,7 @@ class UserController {
     const isValid = checkTelegramAuth(formattedData, process.env.BOT_TOKEN!);
 
     if (!isValid) {
-      console.log('❌ Invalid telegram auth');
+      console.log('Invalid telegram auth');
       return res.status(403).json({ error: 'Invalid telegram auth' });
     }
 
@@ -393,7 +393,7 @@ class UserController {
         telegram_username: data.username || null,
         password: null,
       });
-      console.log('✅ Created new user:', user.id);
+      console.log('Created new user:', user.id);
     }
 
     const { token, refreshToken } = generateTokens({
@@ -401,7 +401,7 @@ class UserController {
       telegram_id: user.telegram_id,
     });
 
-    console.log('✅ Generated JWT token for user:', user.id);
+    console.log('Generated JWT token for user:', user.id);
 
     res.json({
       success: true,
