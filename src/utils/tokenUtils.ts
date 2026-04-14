@@ -65,7 +65,7 @@ export function refreshAccessToken(refreshToken: string): TokenPair | null {
     return null;
   }
 
-  // Удаляем exp и iat из payload, чтобы jwt.sign мог использовать expiresIn
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { exp, iat, ...cleanPayload } = payload as any;
 
   return generateTokens(cleanPayload);
