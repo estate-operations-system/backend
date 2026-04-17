@@ -15,8 +15,8 @@ export interface TokenPair {
 
 /**
  * Генерирует пару токенов (access + refresh)
- * Access token: 15 минут
- * Refresh token: 7 дней
+ * Access token: 1 минута
+ * Refresh token: 1 час
  */
 export function generateTokens(payload: TokenPayload): TokenPair {
   const token = jwt.sign(payload, JWT_SECRET, {
@@ -24,7 +24,7 @@ export function generateTokens(payload: TokenPayload): TokenPair {
   });
 
   const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
-    expiresIn: '7d',
+    expiresIn: '1h',
   });
 
   return { token, refreshToken };
@@ -65,7 +65,7 @@ export function refreshAccessToken(refreshToken: string): TokenPair | null {
     return null;
   }
 
-  // Удаляем exp и iat из payload, чтобы jwt.sign мог использовать expiresIn
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { exp, iat, ...cleanPayload } = payload as any;
 
   return generateTokens(cleanPayload);

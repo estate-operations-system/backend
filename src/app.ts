@@ -24,7 +24,7 @@ app.use(
       `http://estate-operations.ru`,
       'https://woolstapling-johnson-synergistically.ngrok-free.dev',
       /\.ngrok-free\.dev$/,
-      /\.onrender\.com$/
+      /\.onrender\.com$/,
     ],
     credentials: true,
   })
@@ -37,14 +37,18 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 
-// JWT Middleware
 export const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 export function authenticateToken(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   const botTokenHeader = req.headers['x-bot-token'] || req.headers['bot-token'];
-  const botToken = typeof botTokenHeader === 'string' ? botTokenHeader : Array.isArray(botTokenHeader) ? botTokenHeader[0] : undefined;
+  const botToken =
+    typeof botTokenHeader === 'string'
+      ? botTokenHeader
+      : Array.isArray(botTokenHeader)
+        ? botTokenHeader[0]
+        : undefined;
 
   console.log('Auth header:', authHeader);
   console.log('Token:', token ? 'present' : 'missing');

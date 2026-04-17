@@ -16,9 +16,9 @@ const pool = new Pool({
 pool
   .connect()
   .then((client) => {
-    console.log('PostgreSQL подключен');
+    console.log('PostgreSQL is conneted correctly!');
     client.release();
   })
-  .catch((err) => console.error('Ошибка PostgreSQL', err));
+  .catch((err) => console.error('Error while connecting PostgreSQL', err));
 
 export default pool;

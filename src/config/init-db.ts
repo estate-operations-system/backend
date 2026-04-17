@@ -16,13 +16,21 @@ export default async function initDatabase() {
     )
   `);
 
-  await client.query(`
+  await client
+    .query(
+      `
     ALTER TABLE users ALTER COLUMN password DROP NOT NULL
-  `).catch(() => {});
+  `
+    )
+    .catch(() => {});
 
-  await client.query(`
+  await client
+    .query(
+      `
     ALTER TABLE users ALTER COLUMN telegram_username DROP NOT NULL
-  `).catch(() => {});
+  `
+    )
+    .catch(() => {});
 
   await client.query(`
     CREATE TABLE IF NOT EXISTS tickets (
@@ -74,5 +82,5 @@ export default async function initDatabase() {
   `).catch(() => {});
 
   client.release();
-  console.log('БД инициализирована');
+  console.log('DB is initializer correctly!');
 }
