@@ -3,13 +3,13 @@ import { User } from '../types/User';
 
 class UserModel {
   static async create(userData: User): Promise<User> {
-    const { name, password, telegram_id, telegram_username } = userData;
+    const { name, password, telegram_id, telegram_username, email } = userData;
 
     const result = await pool.query(
-      `INSERT INTO users (name, password, telegram_id, telegram_username)
-      VALUES ($1, $2, $3, $4)
+      `INSERT INTO users (name, password, telegram_id, telegram_username, email)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *`,
-      [name, password ?? null, telegram_id, telegram_username]
+      [name, password ?? null, telegram_id, telegram_username, email]
     );
 
     return result.rows[0];
@@ -27,6 +27,11 @@ class UserModel {
 
   static async findByTelegramId(telegramId: number) {
     const result = await pool.query(`SELECT * FROM users WHERE telegram_id = $1`, [telegramId]);
+    return result.rows[0] || null;
+  }
+
+  static async findByEmail(email: string) {
+    const result = await pool.query(`SELECT * FROM users WHERE email = $1`, [email]);
     return result.rows[0] || null;
   }
 

@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
 import User from '../models/userModel';
+import VerificationCodeModel from '../models/verificationCodeModel';
 import crypto from 'crypto';
 import { TelegramAuthData } from '../types/telegramData';
 import { generateTokens } from '../utils/tokenUtils';
+import EmailService from '../utils/emailService';
 
 function checkTelegramAuth(data: any, botToken: string): boolean {
   const { hash, ...fields } = data;
@@ -415,6 +417,141 @@ class UserController {
         telegram_username: user.telegram_username,
       },
     });
+  }
+
+  // Email authentication methods
+  static async sendVerificationCode(req: Request, res: Response) {
+    try {
+      const { email, telegram_id, name } = req.body;
+
+      if (!email || !telegram_id || !name) {
+        return res.status(400).json({
+          success: false,
+          error: 'Email, telegram_id и name обязательны'
+        });
+      }
+
+      // Проверяем, существует ли уже пользователь с таким email
+      const existingUser = await User.findByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({
+          success: false,
+          error: 'Пользователь с таким email уже существует'
+        });
+      }
+
+      // Генерируем 6-значный код
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+      // Устанавливаем время истечения (10 минут)
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+
+      // Удаляем старые коды для этого email
+      await VerificationCodeModel.deleteByEmail(email);
+
+      // Создаем новый код верификации
+      await VerificationCodeModel.create({
+        email,
+        code,
+        telegram_id,
+        expires_at: expiresAt,
+      });
+
+      // Отправляем email
+      const emailService = new EmailService();
+      await emailService.sendVerificationCode(email, code, telegram_id);
+
+      res.json({
+        success: true,
+        message: 'Код подтверждения отправлен на ваш email'
+      });
+    } catch (error) {
+      console.error('Send verification code error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Ошибка отправки кода подтверждения'
+      });
+    }
+  }
+
+  static async verifyCode(req: Request, res: Response) {
+    try {
+      const { email, code, telegram_id, name } = req.body;
+
+      if (!email || !code || !telegram_id || !name) {
+        return res.status(400).json({
+          success: false,
+          error: 'Email, code, telegram_id и name обязательны'
+        });
+      }
+
+      // Ищем код верификации
+      const verificationCode = await VerificationCodeModel.findByEmailAndCode(email, code);
+
+      if (!verificationCode) {
+        return res.status(400).json({
+          success: false,
+          error: 'Неверный или истекший код подтверждения'
+        });
+      }
+
+      // Проверяем, совпадает ли telegram_id
+      if (verificationCode.telegram_id !== telegram_id) {
+        return res.status(400).json({
+          success: false,
+          error: 'Telegram ID не совпадает'
+        });
+      }
+
+      // Ищем существующего пользователя
+      let user = await User.findByEmail(email);
+
+      if (!user) {
+        // Создаем нового пользователя
+        user = await User.create({
+          name,
+          telegram_id,
+          telegram_username: null,
+          email,
+          password: null,
+        });
+      } else {
+        // Обновляем telegram_id если пользователь уже существует
+        // (в случае если пользователь регистрировался через Telegram, а теперь через email)
+        if (user.telegram_id !== telegram_id) {
+          // Здесь можно добавить логику обновления, но для простоты оставим как есть
+        }
+      }
+
+      // Удаляем использованный код
+      await VerificationCodeModel.deleteByEmail(email);
+
+      // Генерируем токены
+      const { token, refreshToken } = generateTokens({
+        userId: user.id,
+        telegram_id: user.telegram_id,
+      });
+
+      res.json({
+        success: true,
+        message: user.id ? 'Авторизация выполнена успешно' : 'Регистрация выполнена успешно',
+        token,
+        refreshToken,
+        data: {
+          id: user.id,
+          name: user.name,
+          telegram_id: user.telegram_id,
+          email: user.email,
+        },
+      });
+    } catch (error) {
+      console.error('Verify code error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Ошибка верификации кода'
+      });
+    }
   }
 }
 
