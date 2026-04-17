@@ -504,10 +504,34 @@ class UserController {
         });
       }
 
-      // Ищем существующего пользователя
-      let user = await User.findByEmail(email);
+      // Сначала проверяем, существует ли пользователь с таким telegram_id
+      let user = await User.findByTelegramId(telegram_id);
 
-      if (!user) {
+      if (user) {
+        // Пользователь существует по telegram_id
+        // Проверяем, совпадает ли email (если у пользователя уже есть email)
+        if (user.email && user.email !== email) {
+          return res.status(409).json({
+            success: false,
+            error: 'Этот Telegram ID уже связан с другой почтой'
+          });
+        }
+
+        // Обновляем email если его не было
+        if (!user.email) {
+          // Здесь можно добавить логику обновления email в будущем
+        }
+      } else {
+        // Пользователя с таким telegram_id нет
+        // Проверяем, существует ли пользователь с таким email
+        const existingUserByEmail = await User.findByEmail(email);
+        if (existingUserByEmail) {
+          return res.status(409).json({
+            success: false,
+            error: 'Пользователь с таким email уже существует, но с другим Telegram ID'
+          });
+        }
+
         // Создаем нового пользователя
         user = await User.create({
           name,
@@ -516,12 +540,6 @@ class UserController {
           email,
           password: null,
         });
-      } else {
-        // Обновляем telegram_id если пользователь уже существует
-        // (в случае если пользователь регистрировался через Telegram, а теперь через email)
-        if (user.telegram_id !== telegram_id) {
-          // Здесь можно добавить логику обновления, но для простоты оставим как есть
-        }
       }
 
       // Удаляем использованный код
