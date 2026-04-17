@@ -16,6 +16,11 @@ export default async function initDatabase() {
     )
   `);
 
+  // Add email column if it doesn't exist (for migration)
+  await client.query(`
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT UNIQUE
+  `).catch(() => {});
+
   await client
     .query(
       `

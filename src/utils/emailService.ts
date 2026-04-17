@@ -28,6 +28,12 @@ class EmailService {
   }
 
   async sendVerificationCode(email: string, code: string, telegramId: string): Promise<void> {
+    // Check if SMTP is configured
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.warn('SMTP not configured. Skipping email send. Code:', code);
+      return;
+    }
+
     const mailOptions = {
       from: `"Estate Operations" <${process.env.SMTP_USER}>`,
       to: email,

@@ -161,6 +161,7 @@ class UserController {
         telegram_id,
         telegram_username,
         password,
+        // email не указываем для обычной регистрации
       });
 
       if (!user.id) {
@@ -339,6 +340,7 @@ class UserController {
         telegram_id: data.id,
         telegram_username: data.username || null,
         password: null,
+        // email не указываем для Telegram пользователей
       });
     }
 
@@ -394,6 +396,7 @@ class UserController {
         telegram_id: data.id,
         telegram_username: data.username || null,
         password: null,
+        // email не указываем для Telegram пользователей
       });
       console.log('Created new user:', user.id);
     }
