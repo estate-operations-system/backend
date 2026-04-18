@@ -430,7 +430,7 @@ class UserController {
       if (!email || !telegram_id || !name) {
         return res.status(400).json({
           success: false,
-          error: 'Email, telegram_id и name обязательны'
+          error: 'Email, telegram_id и name обязательны',
         });
       }
 
@@ -439,7 +439,7 @@ class UserController {
       if (existingUser) {
         return res.status(409).json({
           success: false,
-          error: 'Пользователь с таким email уже существует'
+          error: 'Пользователь с таким email уже существует',
         });
       }
 
@@ -467,13 +467,13 @@ class UserController {
 
       res.json({
         success: true,
-        message: 'Код подтверждения отправлен на ваш email'
+        message: 'Код подтверждения отправлен на ваш email',
       });
     } catch (error) {
       console.error('Send verification code error:', error);
       res.status(500).json({
         success: false,
-        error: 'Ошибка отправки кода подтверждения'
+        error: 'Ошибка отправки кода подтверждения',
       });
     }
   }
@@ -485,7 +485,7 @@ class UserController {
       if (!email || !code || !telegram_id || !name) {
         return res.status(400).json({
           success: false,
-          error: 'Email, code, telegram_id и name обязательны'
+          error: 'Email, code, telegram_id и name обязательны',
         });
       }
 
@@ -495,7 +495,7 @@ class UserController {
       if (!verificationCode) {
         return res.status(400).json({
           success: false,
-          error: 'Неверный или истекший код подтверждения'
+          error: 'Неверный или истекший код подтверждения',
         });
       }
 
@@ -503,7 +503,7 @@ class UserController {
       if (verificationCode.telegram_id !== telegram_id) {
         return res.status(400).json({
           success: false,
-          error: 'Telegram ID не совпадает'
+          error: 'Telegram ID не совпадает',
         });
       }
 
@@ -516,7 +516,7 @@ class UserController {
         if (user.email && user.email !== email) {
           return res.status(409).json({
             success: false,
-            error: 'Этот Telegram ID уже связан с другой почтой'
+            error: 'Этот Telegram ID уже связан с другой почтой',
           });
         }
 
@@ -531,7 +531,7 @@ class UserController {
         if (existingUserByEmail) {
           return res.status(409).json({
             success: false,
-            error: 'Пользователь с таким email уже существует, но с другим Telegram ID'
+            error: 'Пользователь с таким email уже существует, но с другим Telegram ID',
           });
         }
 
@@ -570,7 +570,7 @@ class UserController {
       console.error('Verify code error:', error);
       res.status(500).json({
         success: false,
-        error: 'Ошибка верификации кода'
+        error: 'Ошибка верификации кода',
       });
     }
   }

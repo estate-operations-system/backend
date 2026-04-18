@@ -17,9 +17,13 @@ export default async function initDatabase() {
   `);
 
   // Add email column if it doesn't exist (for migration)
-  await client.query(`
+  await client
+    .query(
+      `
     ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT UNIQUE
-  `).catch(() => {});
+  `
+    )
+    .catch(() => {});
 
   await client
     .query(
@@ -78,13 +82,21 @@ export default async function initDatabase() {
   `);
 
   // Создание индексов для производительности
-  await client.query(`
+  await client
+    .query(
+      `
     CREATE INDEX IF NOT EXISTS idx_verification_codes_email ON verification_codes(email)
-  `).catch(() => {});
+  `
+    )
+    .catch(() => {});
 
-  await client.query(`
+  await client
+    .query(
+      `
     CREATE INDEX IF NOT EXISTS idx_verification_codes_expires_at ON verification_codes(expires_at)
-  `).catch(() => {});
+  `
+    )
+    .catch(() => {});
 
   client.release();
   console.log('DB is initializer correctly!');
