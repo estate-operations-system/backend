@@ -10,10 +10,20 @@ export default async function initDatabase() {
       telegram_id BIGINT UNIQUE,
       password TEXT,
       telegram_username TEXT,
+      email TEXT UNIQUE,
       role TEXT DEFAULT 'resident',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Add email column if it doesn't exist (for migration)
+  await client
+    .query(
+      `
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT UNIQUE
+  `
+    )
+    .catch(() => {});
 
   await client
     .query(
@@ -58,6 +68,35 @@ export default async function initDatabase() {
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  await client.query(`
+    CREATE TABLE IF NOT EXISTS verification_codes (
+      id SERIAL PRIMARY KEY,
+      email TEXT NOT NULL,
+      code TEXT NOT NULL,
+      telegram_id TEXT NOT NULL,
+      expires_at TIMESTAMP NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(email, code)
+    )
+  `);
+
+  // Создание индексов для производительности
+  await client
+    .query(
+      `
+    CREATE INDEX IF NOT EXISTS idx_verification_codes_email ON verification_codes(email)
+  `
+    )
+    .catch(() => {});
+
+  await client
+    .query(
+      `
+    CREATE INDEX IF NOT EXISTS idx_verification_codes_expires_at ON verification_codes(expires_at)
+  `
+    )
+    .catch(() => {});
 
   client.release();
   console.log('DB is initializer correctly!');
