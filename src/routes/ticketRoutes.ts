@@ -185,4 +185,38 @@ router.put('/:id', TicketController.updateTicket);
  */
 router.delete('/:id', TicketController.deleteTicket);
 
+/**
+ * @swagger
+ * /api/tickets/{id}/status:
+ *   patch:
+ *     summary: Обновить статус заявки (только для администраторов)
+ *     tags: [Tickets]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [Новая, В работе, Выполнена]
+ *     responses:
+ *       200:
+ *         description: Статус заявки обновлен
+ *       403:
+ *         description: Доступ запрещен
+ *       404:
+ *         description: Заявка не найдена
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.patch('/:id/status', TicketController.updateTicketStatus);
+
 export default router;
