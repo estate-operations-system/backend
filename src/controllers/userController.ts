@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import { TelegramAuthData } from '../types/telegramData';
 import { generateTokens } from '../utils/tokenUtils';
 import EmailService from '../utils/emailService';
+import { UserRole } from '../types/User';
 
 function checkTelegramAuth(data: any, botToken: string): boolean {
   const { hash, ...fields } = data;
@@ -170,7 +171,7 @@ class UserController {
 
       const { token, refreshToken } = generateTokens({
         userId: user.id,
-        telegram_id: user.telegram_id,
+        telegram_id: user.telegram_id ?? undefined,
         role: user.role,
       });
 
@@ -615,7 +616,9 @@ class UserController {
         return res.status(404).json({ success: false, error: 'Целевой пользователь не найден' });
       }
 
-      const updatedUser = await User.update(targetUserId, { role });
+      const updatedUser = await User.update(targetUserId, { 
+        role: role as UserRole 
+      });
 
       res.json({ 
         success: true, 
