@@ -591,9 +591,17 @@ class UserController {
       }
 
       const { role } = req.body;
+      
+      if (!role || typeof role !== 'string') {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Недопустимая роль. Допустимые значения: жилец, администратор, юрист' 
+        });
+      }
+
       const validRoles = ['жилец', 'администратор', 'юрист'];
       
-      if (!role || !validRoles.includes(role)) {
+      if (!validRoles.includes(role)) {
         return res.status(400).json({ 
           success: false, 
           error: 'Недопустимая роль. Допустимые значения: жилец, администратор, юрист' 

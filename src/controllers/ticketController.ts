@@ -126,7 +126,14 @@ class TicketController {
         return res.status(404).json({ success: false, error: 'Заявка не найдена' });
       }
 
-      const updatedTicket = await Ticket.update(ticketId, { status });
+      // Обновляем только статус, сохраняя остальные поля
+      const updatedTicket = await Ticket.update(ticketId, {
+        category: ticket.category,
+        description: ticket.description || '',
+        address: ticket.address,
+        status: status,
+        resident_id: ticket.resident_id
+      });
 
       res.json({ 
         success: true, 
