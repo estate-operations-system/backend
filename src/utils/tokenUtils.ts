@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { UserRole } from '../types/User';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'your-refresh-secret-key';
@@ -6,6 +7,7 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'your-refresh-s
 export interface TokenPayload {
   userId: number;
   telegram_id?: string;
+  role?: UserRole;
 }
 
 export interface TokenPair {

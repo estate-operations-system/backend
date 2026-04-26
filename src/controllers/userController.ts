@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import { TelegramAuthData } from '../types/telegramData';
 import { generateTokens } from '../utils/tokenUtils';
 import EmailService from '../utils/emailService';
+import { UserRole } from '../types/User';
 
 function checkTelegramAuth(data: any, botToken: string): boolean {
   const { hash, ...fields } = data;
@@ -170,7 +171,8 @@ class UserController {
 
       const { token, refreshToken } = generateTokens({
         userId: user.id,
-        telegram_id: user.telegram_id,
+        telegram_id: user.telegram_id ?? undefined,
+        role: user.role,
       });
 
       res.status(201).json({
@@ -216,6 +218,7 @@ class UserController {
       const { token, refreshToken } = generateTokens({
         userId: user.id,
         telegram_id: user.telegram_id,
+        role: user.role,
       });
 
       return res.json({
@@ -227,6 +230,7 @@ class UserController {
           id: user.id,
           name: user.name,
           telegram_username: user.telegram_username,
+          role: user.role,
         },
       });
     } catch (error) {
@@ -262,6 +266,7 @@ class UserController {
           name: dbUser.name,
           telegram_id: dbUser.telegram_id,
           telegram_username: dbUser.telegram_username,
+          role: dbUser.role,
         },
       });
     } catch (error) {
@@ -347,6 +352,7 @@ class UserController {
     const { token, refreshToken } = generateTokens({
       userId: user.id,
       telegram_id: user.telegram_id,
+      role: user.role,
     });
 
     res.json({
@@ -359,6 +365,7 @@ class UserController {
         name: user.name,
         telegram_id: user.telegram_id,
         telegram_username: user.telegram_username,
+        role: user.role,
       },
     });
   }
@@ -404,6 +411,7 @@ class UserController {
     const { token, refreshToken } = generateTokens({
       userId: user.id,
       telegram_id: user.telegram_id,
+      role: user.role,
     });
 
     console.log('Generated JWT token for user:', user.id);
@@ -418,6 +426,7 @@ class UserController {
         name: user.name,
         telegram_id: user.telegram_id,
         telegram_username: user.telegram_username,
+        role: user.role,
       },
     });
   }
@@ -434,26 +443,12 @@ class UserController {
         });
       }
 
-      // Проверяем, существует ли уже пользователь с таким email
-      const existingUser = await User.findByEmail(email);
-      if (existingUser) {
-        return res.status(409).json({
-          success: false,
-          error: 'Пользователь с таким email уже существует',
-        });
-      }
-
-      // Генерируем 6-значный код
       const code = Math.floor(100000 + Math.random() * 900000).toString();
-
-      // Устанавливаем время истечения (10 минут)
       const expiresAt = new Date();
       expiresAt.setMinutes(expiresAt.getMinutes() + 10);
 
-      // Удаляем старые коды для этого email
       await VerificationCodeModel.deleteByEmail(email);
 
-      // Создаем новый код верификации
       await VerificationCodeModel.create({
         email,
         code,
@@ -461,7 +456,6 @@ class UserController {
         expires_at: expiresAt,
       });
 
-      // Отправляем email
       const emailService = new EmailService();
       await emailService.sendVerificationCode(email, code, telegram_id);
 
@@ -489,7 +483,6 @@ class UserController {
         });
       }
 
-      // Ищем код верификации
       const verificationCode = await VerificationCodeModel.findByEmailAndCode(email, code);
 
       if (!verificationCode) {
@@ -499,7 +492,6 @@ class UserController {
         });
       }
 
-      // Проверяем, совпадает ли telegram_id
       if (verificationCode.telegram_id !== telegram_id) {
         return res.status(400).json({
           success: false,
@@ -508,7 +500,7 @@ class UserController {
       }
 
       // Сначала проверяем, существует ли пользователь с таким telegram_id
-      let user = await User.findByTelegramId(telegram_id);
+      let user = await User.findByTelegramId(Number(telegram_id));
 
       if (user) {
         // Пользователь существует по telegram_id
@@ -518,11 +510,6 @@ class UserController {
             success: false,
             error: 'Этот Telegram ID уже связан с другой почтой',
           });
-        }
-
-        // Обновляем email если его не было
-        if (!user.email) {
-          // Здесь можно добавить логику обновления email в будущем
         }
       } else {
         // Пользователя с таким telegram_id нет
@@ -552,6 +539,7 @@ class UserController {
       const { token, refreshToken } = generateTokens({
         userId: user.id,
         telegram_id: user.telegram_id,
+        role: user.role,
       });
 
       res.json({
@@ -564,6 +552,7 @@ class UserController {
           name: user.name,
           telegram_id: user.telegram_id,
           email: user.email,
+          role: user.role,
         },
       });
     } catch (error) {
@@ -572,6 +561,69 @@ class UserController {
         success: false,
         error: 'Ошибка верификации кода',
       });
+    }
+  }
+
+  // Обновление роли пользователя (только для администраторов)
+  static async updateUserRole(req: Request, res: Response) {
+    try {
+      // Проверяем, что текущий пользователь - администратор
+      const currentUser = (req as any).user;
+      if (!currentUser) {
+        return res.status(401).json({ success: false, error: 'Пользователь не авторизован' });
+      }
+
+      const dbUser = await User.findById(currentUser.userId);
+      if (!dbUser) {
+        return res.status(404).json({ success: false, error: 'Пользователь не найден' });
+      }
+
+      if (dbUser.role !== 'администратор') {
+        return res.status(403).json({
+          success: false,
+          error: 'Доступ запрещен. Только администратор может изменять роли.',
+        });
+      }
+
+      const { role } = req.body;
+
+      if (!role || typeof role !== 'string') {
+        return res.status(400).json({
+          success: false,
+          error: 'Недопустимая роль. Допустимые значения: жилец, администратор, юрист',
+        });
+      }
+
+      const validRoles = ['жилец', 'администратор', 'юрист'];
+
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Недопустимая роль. Допустимые значения: жилец, администратор, юрист',
+        });
+      }
+
+      const targetUserId = parseInt(req.params.id, 10);
+      const targetUser = await User.findById(targetUserId);
+
+      if (!targetUser) {
+        return res.status(404).json({ success: false, error: 'Целевой пользователь не найден' });
+      }
+
+      const updatedUser = await User.update(targetUserId, {
+        role: role as UserRole,
+      });
+
+      res.json({
+        success: true,
+        message: 'Роль пользователя обновлена',
+        data: updatedUser,
+      });
+    } catch (error) {
+      console.error('Ошибка при обновлении роли пользователя:', error);
+      res
+        .status(500)
+        .json({ success: false, error: 'Ошибка сервера при обновлении роли пользователя' });
     }
   }
 }

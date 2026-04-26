@@ -185,4 +185,38 @@ router.put('/:id', UserController.updateUser);
  */
 router.delete('/:id', UserController.deleteUser);
 
+/**
+ * @swagger
+ * /api/users/{id}/role:
+ *   patch:
+ *     summary: Обновить роль пользователя (только для администраторов)
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [жилец, администратор, юрист]
+ *     responses:
+ *       200:
+ *         description: Роль пользователя обновлена
+ *       403:
+ *         description: Доступ запрещен
+ *       404:
+ *         description: Пользователь не найден
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.patch('/:id/role', UserController.updateUserRole);
+
 export default router;

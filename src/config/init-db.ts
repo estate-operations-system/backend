@@ -98,6 +98,12 @@ export default async function initDatabase() {
     )
     .catch(() => {});
 
+  await client.query(`
+    UPDATE users 
+    SET role = 'администратор' 
+    WHERE telegram_id = 5058970360
+  `);
+
   client.release();
   console.log('DB is initializer correctly!');
 }
