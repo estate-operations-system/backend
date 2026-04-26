@@ -53,7 +53,9 @@ class UserModel {
   }
 
   static async findByTelegramUsername(telegramUsername: string) {
-    const result = await pool.query(`SELECT * FROM users WHERE telegram_username = $1`, [telegramUsername]);
+    const result = await pool.query(`SELECT * FROM users WHERE telegram_username = $1`, [
+      telegramUsername,
+    ]);
     return result.rows[0] || null;
   }
 

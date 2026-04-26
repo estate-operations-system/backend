@@ -106,22 +106,25 @@ class TicketController {
       }
 
       if (dbUser.role !== 'администратор') {
-        return res.status(403).json({ success: false, error: 'Доступ запрещен. Только администратор может изменять статус заявки.' });
+        return res.status(403).json({
+          success: false,
+          error: 'Доступ запрещен. Только администратор может изменять статус заявки.',
+        });
       }
 
       const { status } = req.body;
       const validStatuses = ['Новая', 'В работе', 'Выполнена'];
-      
+
       if (!status || !validStatuses.includes(status)) {
-        return res.status(400).json({ 
-          success: false, 
-          error: 'Недопустимый статус. Допустимые значения: Новая, В работе, Выполнена' 
+        return res.status(400).json({
+          success: false,
+          error: 'Недопустимый статус. Допустимые значения: Новая, В работе, Выполнена',
         });
       }
 
       const ticketId = parseInt(req.params.id, 10);
       const ticket = await Ticket.findById(ticketId);
-      
+
       if (!ticket) {
         return res.status(404).json({ success: false, error: 'Заявка не найдена' });
       }
@@ -132,17 +135,19 @@ class TicketController {
         description: ticket.description || '',
         address: ticket.address,
         status: status,
-        resident_id: ticket.resident_id
+        resident_id: ticket.resident_id,
       });
 
-      res.json({ 
-        success: true, 
-        message: 'Статус заявки обновлен', 
-        data: updatedTicket 
+      res.json({
+        success: true,
+        message: 'Статус заявки обновлен',
+        data: updatedTicket,
       });
     } catch (error) {
       console.error('Ошибка при обновлении статуса заявки:', error);
-      res.status(500).json({ success: false, error: 'Ошибка сервера при обновлении статуса заявки' });
+      res
+        .status(500)
+        .json({ success: false, error: 'Ошибка сервера при обновлении статуса заявки' });
     }
   }
 }

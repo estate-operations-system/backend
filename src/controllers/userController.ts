@@ -439,7 +439,7 @@ class UserController {
       if (!email || !telegram_id || !name) {
         return res.status(400).json({
           success: false,
-          error: 'Email, telegram_id и name обязательны'
+          error: 'Email, telegram_id и name обязательны',
         });
       }
 
@@ -461,13 +461,13 @@ class UserController {
 
       res.json({
         success: true,
-        message: 'Код подтверждения отправлен на ваш email'
+        message: 'Код подтверждения отправлен на ваш email',
       });
     } catch (error) {
       console.error('Send verification code error:', error);
       res.status(500).json({
         success: false,
-        error: 'Ошибка отправки кода подтверждения'
+        error: 'Ошибка отправки кода подтверждения',
       });
     }
   }
@@ -479,7 +479,7 @@ class UserController {
       if (!email || !code || !telegram_id || !name) {
         return res.status(400).json({
           success: false,
-          error: 'Email, code, telegram_id и name обязательны'
+          error: 'Email, code, telegram_id и name обязательны',
         });
       }
 
@@ -488,14 +488,14 @@ class UserController {
       if (!verificationCode) {
         return res.status(400).json({
           success: false,
-          error: 'Неверный или истекший код подтверждения'
+          error: 'Неверный или истекший код подтверждения',
         });
       }
 
       if (verificationCode.telegram_id !== telegram_id) {
         return res.status(400).json({
           success: false,
-          error: 'Telegram ID не совпадает'
+          error: 'Telegram ID не совпадает',
         });
       }
 
@@ -508,7 +508,7 @@ class UserController {
         if (user.email && user.email !== email) {
           return res.status(409).json({
             success: false,
-            error: 'Этот Telegram ID уже связан с другой почтой'
+            error: 'Этот Telegram ID уже связан с другой почтой',
           });
         }
       } else {
@@ -518,7 +518,7 @@ class UserController {
         if (existingUserByEmail) {
           return res.status(409).json({
             success: false,
-            error: 'Пользователь с таким email уже существует, но с другим Telegram ID'
+            error: 'Пользователь с таким email уже существует, но с другим Telegram ID',
           });
         }
 
@@ -559,7 +559,7 @@ class UserController {
       console.error('Verify code error:', error);
       res.status(500).json({
         success: false,
-        error: 'Ошибка верификации кода'
+        error: 'Ошибка верификации кода',
       });
     }
   }
@@ -579,46 +579,51 @@ class UserController {
       }
 
       if (dbUser.role !== 'администратор') {
-        return res.status(403).json({ success: false, error: 'Доступ запрещен. Только администратор может изменять роли.' });
+        return res.status(403).json({
+          success: false,
+          error: 'Доступ запрещен. Только администратор может изменять роли.',
+        });
       }
 
       const { role } = req.body;
-      
+
       if (!role || typeof role !== 'string') {
-        return res.status(400).json({ 
-          success: false, 
-          error: 'Недопустимая роль. Допустимые значения: жилец, администратор, юрист' 
+        return res.status(400).json({
+          success: false,
+          error: 'Недопустимая роль. Допустимые значения: жилец, администратор, юрист',
         });
       }
 
       const validRoles = ['жилец', 'администратор', 'юрист'];
-      
+
       if (!validRoles.includes(role)) {
-        return res.status(400).json({ 
-          success: false, 
-          error: 'Недопустимая роль. Допустимые значения: жилец, администратор, юрист' 
+        return res.status(400).json({
+          success: false,
+          error: 'Недопустимая роль. Допустимые значения: жилец, администратор, юрист',
         });
       }
 
       const targetUserId = parseInt(req.params.id, 10);
       const targetUser = await User.findById(targetUserId);
-      
+
       if (!targetUser) {
         return res.status(404).json({ success: false, error: 'Целевой пользователь не найден' });
       }
 
-      const updatedUser = await User.update(targetUserId, { 
-        role: role as UserRole 
+      const updatedUser = await User.update(targetUserId, {
+        role: role as UserRole,
       });
 
-      res.json({ 
-        success: true, 
-        message: 'Роль пользователя обновлена', 
-        data: updatedUser 
+      res.json({
+        success: true,
+        message: 'Роль пользователя обновлена',
+        data: updatedUser,
       });
     } catch (error) {
       console.error('Ошибка при обновлении роли пользователя:', error);
-      res.status(500).json({ success: false, error: 'Ошибка сервера при обновлении роли пользователя' });
+      res
+        .status(500)
+        .json({ success: false, error: 'Ошибка сервера при обновлении роли пользователя' });
     }
   }
 }
