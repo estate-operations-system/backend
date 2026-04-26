@@ -443,15 +443,6 @@ class UserController {
         });
       }
 
-      // Проверяем, существует ли уже пользователь с таким email
-      const existingUser = await User.findByEmail(email);
-      if (existingUser) {
-        return res.status(409).json({
-          success: false,
-          error: 'Пользователь с таким email уже существует'
-        });
-      }
-
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       const expiresAt = new Date();
       expiresAt.setMinutes(expiresAt.getMinutes() + 10);
