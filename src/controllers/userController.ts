@@ -656,7 +656,7 @@ class UserController {
 
       // Generate tokens
       const { token, refreshToken } = generateTokens({
-        userId: user.id,
+        userId: user.id!,
         role: user.role,
       });
 
@@ -785,6 +785,69 @@ class UserController {
         success: false,
         error: 'Ошибка верификации кода',
       });
+    }
+  }
+
+   // Обновление роли пользователя (только для администраторов)
+  static async updateUserRole(req: Request, res: Response) {
+    try {
+      // Проверяем, что текущий пользователь - администратор
+      const currentUser = (req as any).user;
+      if (!currentUser) {
+        return res.status(401).json({ success: false, error: 'Пользователь не авторизован' });
+      }
+
+      const dbUser = await User.findById(currentUser.userId);
+      if (!dbUser) {
+        return res.status(404).json({ success: false, error: 'Пользователь не найден' });
+      }
+
+      if (dbUser.role !== 'администратор') {
+        return res.status(403).json({
+          success: false,
+          error: 'Доступ запрещен. Только администратор может изменять роли.',
+        });
+      }
+
+      const { role } = req.body;
+
+      if (!role || typeof role !== 'string') {
+        return res.status(400).json({
+          success: false,
+          error: 'Недопустимая роль. Допустимые значения: жилец, администратор, юрист',
+        });
+      }
+
+      const validRoles = ['жилец', 'администратор', 'юрист'];
+
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Недопустимая роль. Допустимые значения: жилец, администратор, юрист',
+        });
+      }
+
+      const targetUserId = parseInt(req.params.id, 10);
+      const targetUser = await User.findById(targetUserId);
+
+      if (!targetUser) {
+        return res.status(404).json({ success: false, error: 'Целевой пользователь не найден' });
+      }
+
+      const updatedUser = await User.update(targetUserId, {
+        role: role as UserRole,
+      });
+
+      res.json({
+        success: true,
+        message: 'Роль пользователя обновлена',
+        data: updatedUser,
+      });
+    } catch (error) {
+      console.error('Ошибка при обновлении роли пользователя:', error);
+      res
+        .status(500)
+        .json({ success: false, error: 'Ошибка сервера при обновлении роли пользователя' });
     }
   }
 }
