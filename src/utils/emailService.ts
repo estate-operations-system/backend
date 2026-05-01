@@ -27,12 +27,14 @@ class EmailService {
     this.transporter = nodemailer.createTransport(config);
   }
 
-  async sendVerificationCode(email: string, code: string, telegramId: string): Promise<void> {
+  async sendVerificationCode(email: string, code: string, telegramId?: string): Promise<void> {
     // Check if SMTP is configured
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
       console.warn('SMTP not configured. Skipping email send. Code:', code);
       return;
     }
+
+    const telegramIdHTML = telegramId ? `<p><strong>Ваш Telegram ID:</strong> ${telegramId}</p>` : '';
 
     const mailOptions = {
       from: `"Estate Operations" <${process.env.SMTP_USER}>`,
@@ -46,7 +48,7 @@ class EmailService {
           <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
             <h1 style="color: #1e40af; font-size: 32px; margin: 0; letter-spacing: 5px;">${code}</h1>
           </div>
-          <p><strong>Ваш Telegram ID:</strong> ${telegramId}</p>
+          ${telegramIdHTML}
           <p>Код действителен в течение 10 минут.</p>
           <p>Если вы не запрашивали этот код, просто игнорируйте это письмо.</p>
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">

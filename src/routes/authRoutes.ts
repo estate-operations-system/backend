@@ -297,6 +297,134 @@ router.post('/auth/verify-code', UserController.verifyCode);
 
 /**
  * @swagger
+ * /api/auth/send-registration-code:
+ *   post:
+ *     summary: Отправить код подтверждения для регистрации через email (без Telegram)
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email адрес пользователя
+ *               name:
+ *                 type: string
+ *                 description: Имя пользователя
+ *             required:
+ *               - email
+ *               - name
+ *     responses:
+ *       200:
+ *         description: Код отправлен на email
+ *       400:
+ *         description: Обязательные поля отсутствуют
+ *       409:
+ *         description: Пользователь с таким email уже существует
+ */
+router.post('/auth/send-registration-code', UserController.sendRegistrationCode);
+
+/**
+ * @swagger
+ * /api/auth/verify-registration-code:
+ *   post:
+ *     summary: Проверить код подтверждения и выполнить регистрацию через email
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               code:
+ *                 type: string
+ *                 description: 6-значный код подтверждения
+ *               name:
+ *                 type: string
+ *                 description: Имя пользователя
+ *             required:
+ *               - email
+ *               - code
+ *               - name
+ *     responses:
+ *       200:
+ *         description: Регистрация выполнена успешно
+ *       400:
+ *         description: Неверный или истекший код
+ *       409:
+ *         description: Пользователь уже существует
+ */
+router.post('/auth/verify-registration-code', UserController.verifyRegistrationCode);
+
+/**
+ * @swagger
+ * /api/auth/send-login-code:
+ *   post:
+ *     summary: Отправить код подтверждения для авторизации через email
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email адрес пользователя
+ *             required:
+ *               - email
+ *     responses:
+ *       200:
+ *         description: Код отправлен на email
+ *       404:
+ *         description: Пользователь с таким email не найден
+ */
+router.post('/auth/send-login-code', UserController.sendLoginCode);
+
+/**
+ * @swagger
+ * /api/auth/verify-login-code:
+ *   post:
+ *     summary: Проверить код подтверждения и выполнить авторизацию через email
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               code:
+ *                 type: string
+ *                 description: 6-значный код подтверждения
+ *             required:
+ *               - email
+ *               - code
+ *     responses:
+ *       200:
+ *         description: Авторизация выполнена успешно
+ *       400:
+ *         description: Неверный или истекший код
+ *       404:
+ *         description: Пользователь не найден
+ */
+router.post('/auth/verify-login-code', UserController.verifyLoginCode);
+
+/**
+ * @swagger
  * /api/auth/dev-token:
  *   get:
  *     summary: "[DEV ONLY] Получить тестовый JWT токен"

@@ -4,7 +4,7 @@ export interface VerificationCode {
   id?: number;
   email: string;
   code: string;
-  telegram_id: string;
+  telegram_id?: string;
   expires_at: Date;
   created_at?: Date;
 }
@@ -17,7 +17,7 @@ class VerificationCodeModel {
       `INSERT INTO verification_codes (email, code, telegram_id, expires_at)
       VALUES ($1, $2, $3, $4)
       RETURNING *`,
-      [email, code, telegram_id, expires_at]
+      [email, code, telegram_id ?? null, expires_at]
     );
 
     return result.rows[0];

@@ -564,66 +564,227 @@ class UserController {
     }
   }
 
-  // Обновление роли пользователя (только для администраторов)
-  static async updateUserRole(req: Request, res: Response) {
+  // Email-only authentication methods (without telegram_id)
+  static async sendRegistrationCode(req: Request, res: Response) {
     try {
-      // Проверяем, что текущий пользователь - администратор
-      const currentUser = (req as any).user;
-      if (!currentUser) {
-        return res.status(401).json({ success: false, error: 'Пользователь не авторизован' });
-      }
+      const { email, name } = req.body;
 
-      const dbUser = await User.findById(currentUser.userId);
-      if (!dbUser) {
-        return res.status(404).json({ success: false, error: 'Пользователь не найден' });
-      }
-
-      if (dbUser.role !== 'администратор') {
-        return res.status(403).json({
-          success: false,
-          error: 'Доступ запрещен. Только администратор может изменять роли.',
-        });
-      }
-
-      const { role } = req.body;
-
-      if (!role || typeof role !== 'string') {
+      if (!email || !name) {
         return res.status(400).json({
           success: false,
-          error: 'Недопустимая роль. Допустимые значения: жилец, администратор, юрист',
+          error: 'Email и name обязательны',
         });
       }
 
-      const validRoles = ['жилец', 'администратор', 'юрист'];
+      // Check if user already exists
+      const existingUser = await User.findByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({
+          success: false,
+          error: 'Пользователь с таким email уже существует',
+        });
+      }
 
-      if (!validRoles.includes(role)) {
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+
+      await VerificationCodeModel.deleteByEmail(email);
+
+      await VerificationCodeModel.create({
+        email,
+        code,
+        expires_at: expiresAt,
+      });
+
+      const emailService = new EmailService();
+      await emailService.sendVerificationCode(email, code);
+
+      res.json({
+        success: true,
+        message: 'Код подтверждения отправлен на ваш email',
+      });
+    } catch (error) {
+      console.error('Send registration code error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Ошибка отправки кода подтверждения',
+      });
+    }
+  }
+
+  static async verifyRegistrationCode(req: Request, res: Response) {
+    try {
+      const { email, code, name } = req.body;
+
+      if (!email || !code || !name) {
         return res.status(400).json({
           success: false,
-          error: 'Недопустимая роль. Допустимые значения: жилец, администратор, юрист',
+          error: 'Email, code и name обязательны',
         });
       }
 
-      const targetUserId = parseInt(req.params.id, 10);
-      const targetUser = await User.findById(targetUserId);
+      const verificationCode = await VerificationCodeModel.findByEmailAndCode(email, code);
 
-      if (!targetUser) {
-        return res.status(404).json({ success: false, error: 'Целевой пользователь не найден' });
+      if (!verificationCode) {
+        return res.status(400).json({
+          success: false,
+          error: 'Неверный или истекший код подтверждения',
+        });
       }
 
-      const updatedUser = await User.update(targetUserId, {
-        role: role as UserRole,
+      // Check if user already exists
+      const existingUser = await User.findByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({
+          success: false,
+          error: 'Пользователь с таким email уже существует',
+        });
+      }
+
+      // Create new user
+      const user = await User.create({
+        name,
+        email,
+        telegram_id: null,
+        telegram_username: null,
+        password: null,
+      });
+
+      // Delete used code
+      await VerificationCodeModel.deleteByEmail(email);
+
+      // Generate tokens
+      const { token, refreshToken } = generateTokens({
+        userId: user.id,
+        role: user.role,
       });
 
       res.json({
         success: true,
-        message: 'Роль пользователя обновлена',
-        data: updatedUser,
+        message: 'Регистрация выполнена успешно',
+        token,
+        refreshToken,
+        data: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
       });
     } catch (error) {
-      console.error('Ошибка при обновлении роли пользователя:', error);
-      res
-        .status(500)
-        .json({ success: false, error: 'Ошибка сервера при обновлении роли пользователя' });
+      console.error('Verify registration code error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Ошибка верификации кода',
+      });
+    }
+  }
+
+  static async sendLoginCode(req: Request, res: Response) {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({
+          success: false,
+          error: 'Email обязателен',
+        });
+      }
+
+      // Check if user exists
+      const existingUser = await User.findByEmail(email);
+      if (!existingUser) {
+        return res.status(404).json({
+          success: false,
+          error: 'Пользователь с таким email не найден',
+        });
+      }
+
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+
+      await VerificationCodeModel.deleteByEmail(email);
+
+      await VerificationCodeModel.create({
+        email,
+        code,
+        expires_at: expiresAt,
+      });
+
+      const emailService = new EmailService();
+      await emailService.sendVerificationCode(email, code);
+
+      res.json({
+        success: true,
+        message: 'Код подтверждения отправлен на ваш email',
+      });
+    } catch (error) {
+      console.error('Send login code error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Ошибка отправки кода подтверждения',
+      });
+    }
+  }
+
+  static async verifyLoginCode(req: Request, res: Response) {
+    try {
+      const { email, code } = req.body;
+
+      if (!email || !code) {
+        return res.status(400).json({
+          success: false,
+          error: 'Email и code обязательны',
+        });
+      }
+
+      const verificationCode = await VerificationCodeModel.findByEmailAndCode(email, code);
+
+      if (!verificationCode) {
+        return res.status(400).json({
+          success: false,
+          error: 'Неверный или истекший код подтверждения',
+        });
+      }
+
+      // Find user
+      const user = await User.findByEmail(email);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          error: 'Пользователь не найден',
+        });
+      }
+
+      // Delete used code
+      await VerificationCodeModel.deleteByEmail(email);
+
+      // Generate tokens
+      const { token, refreshToken } = generateTokens({
+        userId: user.id,
+        role: user.role,
+      });
+
+      res.json({
+        success: true,
+        message: 'Авторизация выполнена успешно',
+        token,
+        refreshToken,
+        data: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      });
+    } catch (error) {
+      console.error('Verify login code error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Ошибка верификации кода',
+      });
     }
   }
 }
