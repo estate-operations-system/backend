@@ -81,6 +81,15 @@ export default async function initDatabase() {
     )
   `);
 
+  // Drop telegram_id column if it exists (migration)
+  await client
+    .query(
+      `
+    ALTER TABLE verification_codes DROP COLUMN IF EXISTS telegram_id
+  `
+    )
+    .catch(() => {});
+
   // Создание индексов для производительности
   await client
     .query(
