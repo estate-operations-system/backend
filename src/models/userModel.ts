@@ -1,5 +1,6 @@
 import pool from '../config/database';
 import { User } from '../types/User';
+import { generateColorFromId } from '../utils/colorUtils';
 
 class UserModel {
   static async create(userData: User): Promise<User> {
@@ -47,7 +48,17 @@ class UserModel {
       values
     );
 
-    return result.rows[0];
+    let createdUser = result.rows[0];
+    if (!createdUser.color) {
+      const generatedColor = generateColorFromId(createdUser.id);
+      const updatedResult = await pool.query(
+        `UPDATE users SET color = $1 WHERE id = $2 RETURNING *`,
+        [generatedColor, createdUser.id]
+      );
+      createdUser = updatedResult.rows[0];
+    }
+
+    return createdUser;
   }
 
   static async findAll(): Promise<User[]> {
