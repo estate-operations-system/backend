@@ -49,6 +49,10 @@ const router = Router();
  *         created_at:
  *           type: string
  *           format: date-time
+ *       required:
+ *         - id
+ *         - name
+ *         - role
  *
  *     UserCreate:
  *       type: object
