@@ -41,6 +41,40 @@ export default async function initDatabase() {
     )
     .catch(() => {});
 
+  // Add new columns
+  await client
+    .query(
+      `
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS color TEXT
+  `
+    )
+    .catch(() => {});
+
+  await client
+    .query(
+      `
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_number TEXT
+  `
+    )
+    .catch(() => {});
+
+  await client
+    .query(
+      `
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT
+  `
+    )
+    .catch(() => {});
+
+  // Make role nullable
+  await client
+    .query(
+      `
+    ALTER TABLE users ALTER COLUMN role DROP DEFAULT
+  `
+    )
+    .catch(() => {});
+
   await client.query(`
     CREATE TABLE IF NOT EXISTS tickets (
       id SERIAL PRIMARY KEY,

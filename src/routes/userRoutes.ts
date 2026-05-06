@@ -23,10 +23,29 @@ const router = Router();
  *           type: string
  *         password:
  *           type: string
+ *           nullable: true
  *         telegram_id:
  *           type: string
+ *           nullable: true
  *         telegram_username:
  *           type: string
+ *           nullable: true
+ *         email:
+ *           type: string
+ *           nullable: true
+ *         role:
+ *           type: string
+ *           enum: ['жилец', 'администратор', 'юрист']
+ *           nullable: true
+ *         color:
+ *           type: string
+ *           nullable: true
+ *         phoneNumber:
+ *           type: string
+ *           nullable: true
+ *         address:
+ *           type: string
+ *           nullable: true
  *         created_at:
  *           type: string
  *           format: date-time
@@ -42,6 +61,17 @@ const router = Router();
  *           type: string
  *         password:
  *           type: string
+ *         email:
+ *           type: string
+ *         role:
+ *           type: string
+ *           enum: ['жилец', 'администратор', 'юрист']
+ *         color:
+ *           type: string
+ *         phoneNumber:
+ *           type: string
+ *         address:
+ *           type: string
  *       required:
  *         - name
  *         - telegram_id
@@ -52,6 +82,17 @@ const router = Router();
  *         name:
  *           type: string
  *         password:
+ *           type: string
+ *         email:
+ *           type: string
+ *         role:
+ *           type: string
+ *           enum: ['жилец', 'администратор', 'юрист']
+ *         color:
+ *           type: string
+ *         phoneNumber:
+ *           type: string
+ *         address:
  *           type: string
  */
 

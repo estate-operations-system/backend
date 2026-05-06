@@ -30,7 +30,7 @@ function checkTelegramAuth(data: any, botToken: string): boolean {
 class UserController {
   static async createUser(req: Request, res: Response) {
     try {
-      const { name, telegram_id, telegram_username, password } = req.body;
+      const { name, telegram_id, telegram_username, password, email, role, color, phoneNumber, address } = req.body;
 
       if (!name || !telegram_id) {
         return res.status(400).json({ success: false, error: 'Имя и telegram_id обязательны' });
@@ -48,6 +48,11 @@ class UserController {
         telegram_id,
         telegram_username,
         password,
+        email,
+        role,
+        color,
+        phoneNumber,
+        address,
       });
 
       res.json({ success: true, message: 'Пользователь создан', data: newUser });
@@ -109,7 +114,7 @@ class UserController {
 
   static async updateUser(req: Request, res: Response) {
     try {
-      const { name, telegram_id, telegram_username, password } = req.body;
+      const { name, telegram_id, telegram_username, password, email, role, color, phoneNumber, address } = req.body;
 
       const user = await User.findById(parseInt(req.params.id, 10));
       if (!user) {
@@ -121,6 +126,11 @@ class UserController {
         telegram_id,
         telegram_username,
         password,
+        email,
+        role,
+        color,
+        phoneNumber,
+        address,
       });
 
       res.json({ success: true, message: 'Пользователь обновлен', data: updatedUser });
