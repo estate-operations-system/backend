@@ -42,6 +42,7 @@ export default async function initDatabase() {
     )
     .catch(() => {});
 
+
   // Add new columns
   await client
     .query(
@@ -149,6 +150,29 @@ export default async function initDatabase() {
   `
     )
     .catch(() => {});
+
+  // Таблица для комментариев к заявкам
+  await client.query(`
+    CREATE TABLE IF NOT EXISTS ticket_comments (
+      id SERIAL PRIMARY KEY,
+      ticket_id INTEGER NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      comment TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Таблица для истории изменений статуса заявок
+  await client.query(`
+    CREATE TABLE IF NOT EXISTS ticket_status_history (
+      id SERIAL PRIMARY KEY,
+      ticket_id INTEGER NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
+      old_status TEXT,
+      new_status TEXT NOT NULL,
+      changed_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
 
   await client.query(`
     UPDATE users 
