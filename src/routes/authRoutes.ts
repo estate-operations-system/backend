@@ -219,7 +219,6 @@ router.post('/auth/login', UserController.login);
  */
 router.post('/auth/refresh', UserController.refreshToken);
 
-
 /**
  * @swagger
  * /api/auth/send-registration-code:
@@ -347,65 +346,5 @@ router.post('/auth/send-login-code', UserController.sendLoginCode);
  *         description: Пользователь не найден
  */
 router.post('/auth/verify-login-code', UserController.verifyLoginCode);
-
-/**
- * @swagger
- * /api/auth/dev-token:
- *   get:
- *     summary: "[DEV ONLY] Получить тестовый JWT токен"
- *     tags: [Auth]
- *     description: Только для разработки и тестирования. НЕ ИСПОЛЬЗУЙТЕ В PRODUCTION!
- *     parameters:
- *       - in: query
- *         name: userId
- *         schema:
- *           type: integer
- *           default: 1
- *         description: ID пользователя для токена
- *       - in: query
- *         name: role
- *         schema:
- *           type: string
- *           default: admin
- *         description: Роль пользователя
- *     responses:
- *       200:
- *         description: Успешно получен тестовый токен
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 token:
- *                   type: string
- *                 refreshToken:
- *                   type: string
- *       403:
- *         description: Только доступно в development режиме
- */
-if (process.env.NODE_ENV === 'development') {
-  router.get('/auth/dev-token', (req, res) => {
-    const { generateTokens } = require('../utils/tokenUtils');
-    
-    const userId = parseInt(req.query.userId as string) || 1;
-    const role = (req.query.role as string) || 'admin';
-    
-    const { token, refreshToken } = generateTokens({
-      userId,
-      role,
-      telegram_id: 'dev-user'
-    });
-    
-    res.json({
-      success: true,
-      message: 'DEV TOKEN - Only for testing!',
-      token,
-      refreshToken,
-      payload: { userId, role }
-    });
-  });
-}
 
 export default router;

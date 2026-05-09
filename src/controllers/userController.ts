@@ -30,7 +30,17 @@ function checkTelegramAuth(data: any, botToken: string): boolean {
 class UserController {
   static async createUser(req: Request, res: Response) {
     try {
-      const { name, telegram_id, telegram_username, password, email, role, color, phoneNumber, address } = req.body;
+      const {
+        name,
+        telegram_id,
+        telegram_username,
+        password,
+        email,
+        role,
+        color,
+        phoneNumber,
+        address,
+      } = req.body;
 
       if (!name || !telegram_id) {
         return res.status(400).json({ success: false, error: 'Имя и telegram_id обязательны' });
@@ -114,7 +124,17 @@ class UserController {
 
   static async updateUser(req: Request, res: Response) {
     try {
-      const { name, telegram_id, telegram_username, password, email, role, color, phoneNumber, address } = req.body;
+      const {
+        name,
+        telegram_id,
+        telegram_username,
+        password,
+        email,
+        role,
+        color,
+        phoneNumber,
+        address,
+      } = req.body;
 
       const user = await User.findById(parseInt(req.params.id, 10));
       if (!user) {
@@ -665,7 +685,7 @@ class UserController {
     }
   }
 
-   // Обновление роли пользователя (только для администраторов)
+  // Обновление роли пользователя (только для администраторов)
   static async updateUserRole(req: Request, res: Response) {
     try {
       // Проверяем, что текущий пользователь - администратор

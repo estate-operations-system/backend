@@ -53,10 +53,10 @@ export default async function initDatabase() {
 
   const usersWithoutColor = await client.query(`SELECT id FROM users WHERE color IS NULL`);
   for (const row of usersWithoutColor.rows) {
-    await client.query(
-      `UPDATE users SET color = $1 WHERE id = $2`,
-      [generateColorFromId(row.id), row.id]
-    );
+    await client.query(`UPDATE users SET color = $1 WHERE id = $2`, [
+      generateColorFromId(row.id),
+      row.id,
+    ]);
   }
 
   await client

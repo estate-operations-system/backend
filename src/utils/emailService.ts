@@ -34,7 +34,9 @@ class EmailService {
       return;
     }
 
-    const telegramIdHTML = telegramId ? `<p><strong>Ваш Telegram ID:</strong> ${telegramId}</p>` : '';
+    const telegramIdHTML = telegramId
+      ? `<p><strong>Ваш Telegram ID:</strong> ${telegramId}</p>`
+      : '';
 
     const mailOptions = {
       from: `"Estate Operations" <${process.env.SMTP_USER}>`,

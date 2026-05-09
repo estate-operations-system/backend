@@ -4,7 +4,17 @@ import { generateColorFromId } from '../utils/colorUtils';
 
 class UserModel {
   static async create(userData: User): Promise<User> {
-    const { name, password, telegram_id, telegram_username, email, role, color, phoneNumber, address } = userData;
+    const {
+      name,
+      password,
+      telegram_id,
+      telegram_username,
+      email,
+      role,
+      color,
+      phoneNumber,
+      address,
+    } = userData;
 
     // Для Telegram пользователей не указываем email, чтобы избежать конфликтов с UNIQUE
     const fields = ['name', 'password', 'telegram_id', 'telegram_username'];
