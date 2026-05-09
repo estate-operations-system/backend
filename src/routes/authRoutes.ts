@@ -221,9 +221,9 @@ router.post('/auth/refresh', UserController.refreshToken);
 
 /**
  * @swagger
- * /api/auth/send-verification-code:
+ * /api/auth/send-registration-code:
  *   post:
- *     summary: Отправить код подтверждения на email
+ *     summary: Отправить код подтверждения для регистрации через email (без Telegram)
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -236,15 +236,11 @@ router.post('/auth/refresh', UserController.refreshToken);
  *                 type: string
  *                 format: email
  *                 description: Email адрес пользователя
- *               telegram_id:
- *                 type: string
- *                 description: Telegram ID пользователя
  *               name:
  *                 type: string
  *                 description: Имя пользователя
  *             required:
  *               - email
- *               - telegram_id
  *               - name
  *     responses:
  *       200:
@@ -254,13 +250,49 @@ router.post('/auth/refresh', UserController.refreshToken);
  *       409:
  *         description: Пользователь с таким email уже существует
  */
-router.post('/auth/send-verification-code', UserController.sendVerificationCode);
+router.post('/auth/send-registration-code', UserController.sendRegistrationCode);
 
 /**
  * @swagger
- * /api/auth/verify-code:
+ * /api/auth/verify-registration-code:
  *   post:
- *     summary: Проверить код подтверждения и выполнить регистрацию/авторизацию
+ *     summary: Проверить код подтверждения и выполнить регистрацию через email
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               code:
+ *                 type: string
+ *                 description: 6-значный код подтверждения
+ *               name:
+ *                 type: string
+ *                 description: Имя пользователя
+ *             required:
+ *               - email
+ *               - code
+ *               - name
+ *     responses:
+ *       200:
+ *         description: Регистрация выполнена успешно
+ *       400:
+ *         description: Неверный или истекший код
+ *       409:
+ *         description: Пользователь уже существует
+ */
+router.post('/auth/verify-registration-code', UserController.verifyRegistrationCode);
+
+/**
+ * @swagger
+ * /api/auth/send-login-code:
+ *   post:
+ *     summary: Отправить код подтверждения для авторизации через email
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -273,26 +305,46 @@ router.post('/auth/send-verification-code', UserController.sendVerificationCode)
  *                 type: string
  *                 format: email
  *                 description: Email адрес пользователя
+ *             required:
+ *               - email
+ *     responses:
+ *       200:
+ *         description: Код отправлен на email
+ *       404:
+ *         description: Пользователь с таким email не найден
+ */
+router.post('/auth/send-login-code', UserController.sendLoginCode);
+
+/**
+ * @swagger
+ * /api/auth/verify-login-code:
+ *   post:
+ *     summary: Проверить код подтверждения и выполнить авторизацию через email
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
  *               code:
  *                 type: string
  *                 description: 6-значный код подтверждения
- *               telegram_id:
- *                 type: string
- *                 description: Telegram ID пользователя
- *               name:
- *                 type: string
- *                 description: Имя пользователя
  *             required:
  *               - email
  *               - code
- *               - telegram_id
- *               - name
  *     responses:
  *       200:
- *         description: Регистрация/авторизация выполнена успешно
+ *         description: Авторизация выполнена успешно
  *       400:
  *         description: Неверный или истекший код
+ *       404:
+ *         description: Пользователь не найден
  */
-router.post('/auth/verify-code', UserController.verifyCode);
+router.post('/auth/verify-login-code', UserController.verifyLoginCode);
 
 export default router;

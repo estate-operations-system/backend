@@ -1,4 +1,5 @@
 import pool from './database';
+import { generateColorFromId } from '../utils/colorUtils';
 
 export default async function initDatabase() {
   const client = await pool.connect();
@@ -37,6 +38,48 @@ export default async function initDatabase() {
     .query(
       `
     ALTER TABLE users ALTER COLUMN telegram_username DROP NOT NULL
+  `
+    )
+    .catch(() => {});
+
+  // Add new columns
+  await client
+    .query(
+      `
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS color TEXT
+  `
+    )
+    .catch(() => {});
+
+  const usersWithoutColor = await client.query(`SELECT id FROM users WHERE color IS NULL`);
+  for (const row of usersWithoutColor.rows) {
+    await client.query(`UPDATE users SET color = $1 WHERE id = $2`, [
+      generateColorFromId(row.id),
+      row.id,
+    ]);
+  }
+
+  await client
+    .query(
+      `
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_number TEXT
+  `
+    )
+    .catch(() => {});
+
+  await client
+    .query(
+      `
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT
+  `
+    )
+    .catch(() => {});
+
+  // Make role nullable
+  await client
+    .query(
+      `
+    ALTER TABLE users ALTER COLUMN role DROP DEFAULT
   `
     )
     .catch(() => {});
@@ -80,6 +123,15 @@ export default async function initDatabase() {
       UNIQUE(email, code)
     )
   `);
+
+  // Drop telegram_id column if it exists (migration)
+  await client
+    .query(
+      `
+    ALTER TABLE verification_codes DROP COLUMN IF EXISTS telegram_id
+  `
+    )
+    .catch(() => {});
 
   // Создание индексов для производительности
   await client

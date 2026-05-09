@@ -1,9 +1,20 @@
 import pool from '../config/database';
 import { User } from '../types/User';
+import { generateColorFromId } from '../utils/colorUtils';
 
 class UserModel {
   static async create(userData: User): Promise<User> {
-    const { name, password, telegram_id, telegram_username, email, role } = userData;
+    const {
+      name,
+      password,
+      telegram_id,
+      telegram_username,
+      email,
+      role,
+      color,
+      phoneNumber,
+      address,
+    } = userData;
 
     // Для Telegram пользователей не указываем email, чтобы избежать конфликтов с UNIQUE
     const fields = ['name', 'password', 'telegram_id', 'telegram_username'];
@@ -16,14 +27,27 @@ class UserModel {
       placeholders.push(`$${values.length}`);
     }
 
-    // По умолчанию роль "жилец"
     if (role !== undefined) {
       fields.push('role');
       values.push(role);
       placeholders.push(`$${values.length}`);
-    } else {
-      fields.push('role');
-      values.push('жилец');
+    }
+
+    if (color !== undefined) {
+      fields.push('color');
+      values.push(color);
+      placeholders.push(`$${values.length}`);
+    }
+
+    if (phoneNumber !== undefined) {
+      fields.push('phone_number');
+      values.push(phoneNumber);
+      placeholders.push(`$${values.length}`);
+    }
+
+    if (address !== undefined) {
+      fields.push('address');
+      values.push(address);
       placeholders.push(`$${values.length}`);
     }
 
@@ -34,7 +58,17 @@ class UserModel {
       values
     );
 
-    return result.rows[0];
+    let createdUser = result.rows[0];
+    if (!createdUser.color) {
+      const generatedColor = generateColorFromId(createdUser.id);
+      const updatedResult = await pool.query(
+        `UPDATE users SET color = $1 WHERE id = $2 RETURNING *`,
+        [generatedColor, createdUser.id]
+      );
+      createdUser = updatedResult.rows[0];
+    }
+
+    return createdUser;
   }
 
   static async findAll(): Promise<User[]> {
@@ -91,6 +125,18 @@ class UserModel {
     if (userData.role !== undefined) {
       fields.push('role');
       values.push(userData.role);
+    }
+    if (userData.color !== undefined) {
+      fields.push('color');
+      values.push(userData.color);
+    }
+    if (userData.phoneNumber !== undefined) {
+      fields.push('phone_number');
+      values.push(userData.phoneNumber);
+    }
+    if (userData.address !== undefined) {
+      fields.push('address');
+      values.push(userData.address);
     }
 
     if (fields.length === 0) {

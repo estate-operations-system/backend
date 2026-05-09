@@ -4,20 +4,19 @@ export interface VerificationCode {
   id?: number;
   email: string;
   code: string;
-  telegram_id: string;
   expires_at: Date;
   created_at?: Date;
 }
 
 class VerificationCodeModel {
   static async create(codeData: VerificationCode): Promise<VerificationCode> {
-    const { email, code, telegram_id, expires_at } = codeData;
+    const { email, code, expires_at } = codeData;
 
     const result = await pool.query(
-      `INSERT INTO verification_codes (email, code, telegram_id, expires_at)
-      VALUES ($1, $2, $3, $4)
+      `INSERT INTO verification_codes (email, code, expires_at)
+      VALUES ($1, $2, $3)
       RETURNING *`,
-      [email, code, telegram_id, expires_at]
+      [email, code, expires_at]
     );
 
     return result.rows[0];

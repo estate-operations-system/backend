@@ -7,7 +7,7 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'your-refresh-s
 export interface TokenPayload {
   userId: number;
   telegram_id?: string;
-  role?: UserRole;
+  role?: UserRole | null;
 }
 
 export interface TokenPair {

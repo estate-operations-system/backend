@@ -7,6 +7,9 @@ export interface User {
   telegram_id: string | null;
   telegram_username: string | null;
   email?: string;
-  role?: UserRole;
+  role?: UserRole | null;
+  color?: string | null;
+  phoneNumber?: string | null;
+  address?: string | null;
   created_at?: Date;
 }

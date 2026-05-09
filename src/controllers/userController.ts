@@ -30,7 +30,17 @@ function checkTelegramAuth(data: any, botToken: string): boolean {
 class UserController {
   static async createUser(req: Request, res: Response) {
     try {
-      const { name, telegram_id, telegram_username, password } = req.body;
+      const {
+        name,
+        telegram_id,
+        telegram_username,
+        password,
+        email,
+        role,
+        color,
+        phoneNumber,
+        address,
+      } = req.body;
 
       if (!name || !telegram_id) {
         return res.status(400).json({ success: false, error: 'Имя и telegram_id обязательны' });
@@ -48,6 +58,11 @@ class UserController {
         telegram_id,
         telegram_username,
         password,
+        email,
+        role,
+        color,
+        phoneNumber,
+        address,
       });
 
       res.json({ success: true, message: 'Пользователь создан', data: newUser });
@@ -109,7 +124,17 @@ class UserController {
 
   static async updateUser(req: Request, res: Response) {
     try {
-      const { name, telegram_id, telegram_username, password } = req.body;
+      const {
+        name,
+        telegram_id,
+        telegram_username,
+        password,
+        email,
+        role,
+        color,
+        phoneNumber,
+        address,
+      } = req.body;
 
       const user = await User.findById(parseInt(req.params.id, 10));
       if (!user) {
@@ -121,6 +146,11 @@ class UserController {
         telegram_id,
         telegram_username,
         password,
+        email,
+        role,
+        color,
+        phoneNumber,
+        address,
       });
 
       res.json({ success: true, message: 'Пользователь обновлен', data: updatedUser });
@@ -431,15 +461,24 @@ class UserController {
     });
   }
 
-  // Email authentication methods
-  static async sendVerificationCode(req: Request, res: Response) {
+  // Email-only authentication methods (without telegram_id)
+  static async sendRegistrationCode(req: Request, res: Response) {
     try {
-      const { email, telegram_id, name } = req.body;
+      const { email, name } = req.body;
 
-      if (!email || !telegram_id || !name) {
+      if (!email || !name) {
         return res.status(400).json({
           success: false,
-          error: 'Email, telegram_id и name обязательны',
+          error: 'Email и name обязательны',
+        });
+      }
+
+      // Check if user already exists
+      const existingUser = await User.findByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({
+          success: false,
+          error: 'Пользователь с таким email уже существует',
         });
       }
 
@@ -452,19 +491,18 @@ class UserController {
       await VerificationCodeModel.create({
         email,
         code,
-        telegram_id,
         expires_at: expiresAt,
       });
 
       const emailService = new EmailService();
-      await emailService.sendVerificationCode(email, code, telegram_id);
+      await emailService.sendVerificationCode(email, code);
 
       res.json({
         success: true,
         message: 'Код подтверждения отправлен на ваш email',
       });
     } catch (error) {
-      console.error('Send verification code error:', error);
+      console.error('Send registration code error:', error);
       res.status(500).json({
         success: false,
         error: 'Ошибка отправки кода подтверждения',
@@ -472,14 +510,14 @@ class UserController {
     }
   }
 
-  static async verifyCode(req: Request, res: Response) {
+  static async verifyRegistrationCode(req: Request, res: Response) {
     try {
-      const { email, code, telegram_id, name } = req.body;
+      const { email, code, name } = req.body;
 
-      if (!email || !code || !telegram_id || !name) {
+      if (!email || !code || !name) {
         return res.status(400).json({
           success: false,
-          error: 'Email, code, telegram_id и name обязательны',
+          error: 'Email, code и name обязательны',
         });
       }
 
@@ -492,71 +530,154 @@ class UserController {
         });
       }
 
-      if (verificationCode.telegram_id !== telegram_id) {
-        return res.status(400).json({
+      // Check if user already exists
+      const existingUser = await User.findByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({
           success: false,
-          error: 'Telegram ID не совпадает',
+          error: 'Пользователь с таким email уже существует',
         });
       }
 
-      // Сначала проверяем, существует ли пользователь с таким telegram_id
-      let user = await User.findByTelegramId(Number(telegram_id));
+      // Create new user
+      const user = await User.create({
+        name,
+        email,
+        telegram_id: null,
+        telegram_username: null,
+        password: null,
+      });
 
-      if (user) {
-        // Пользователь существует по telegram_id
-        // Проверяем, совпадает ли email (если у пользователя уже есть email)
-        if (user.email && user.email !== email) {
-          return res.status(409).json({
-            success: false,
-            error: 'Этот Telegram ID уже связан с другой почтой',
-          });
-        }
-      } else {
-        // Пользователя с таким telegram_id нет
-        // Проверяем, существует ли пользователь с таким email
-        const existingUserByEmail = await User.findByEmail(email);
-        if (existingUserByEmail) {
-          return res.status(409).json({
-            success: false,
-            error: 'Пользователь с таким email уже существует, но с другим Telegram ID',
-          });
-        }
-
-        // Создаем нового пользователя
-        user = await User.create({
-          name,
-          telegram_id,
-          telegram_username: null,
-          email,
-          password: null,
-        });
-      }
-
-      // Удаляем использованный код
+      // Delete used code
       await VerificationCodeModel.deleteByEmail(email);
 
-      // Генерируем токены
+      // Generate tokens
       const { token, refreshToken } = generateTokens({
-        userId: user.id,
-        telegram_id: user.telegram_id,
+        userId: user.id!,
         role: user.role,
       });
 
       res.json({
         success: true,
-        message: user.id ? 'Авторизация выполнена успешно' : 'Регистрация выполнена успешно',
+        message: 'Регистрация выполнена успешно',
         token,
         refreshToken,
         data: {
           id: user.id,
           name: user.name,
-          telegram_id: user.telegram_id,
           email: user.email,
           role: user.role,
         },
       });
     } catch (error) {
-      console.error('Verify code error:', error);
+      console.error('Verify registration code error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Ошибка верификации кода',
+      });
+    }
+  }
+
+  static async sendLoginCode(req: Request, res: Response) {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({
+          success: false,
+          error: 'Email обязателен',
+        });
+      }
+
+      // Check if user exists
+      const existingUser = await User.findByEmail(email);
+      if (!existingUser) {
+        return res.status(404).json({
+          success: false,
+          error: 'Пользователь с таким email не найден',
+        });
+      }
+
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+
+      await VerificationCodeModel.deleteByEmail(email);
+
+      await VerificationCodeModel.create({
+        email,
+        code,
+        expires_at: expiresAt,
+      });
+
+      const emailService = new EmailService();
+      await emailService.sendVerificationCode(email, code);
+
+      res.json({
+        success: true,
+        message: 'Код подтверждения отправлен на ваш email',
+      });
+    } catch (error) {
+      console.error('Send login code error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Ошибка отправки кода подтверждения',
+      });
+    }
+  }
+
+  static async verifyLoginCode(req: Request, res: Response) {
+    try {
+      const { email, code } = req.body;
+
+      if (!email || !code) {
+        return res.status(400).json({
+          success: false,
+          error: 'Email и code обязательны',
+        });
+      }
+
+      const verificationCode = await VerificationCodeModel.findByEmailAndCode(email, code);
+
+      if (!verificationCode) {
+        return res.status(400).json({
+          success: false,
+          error: 'Неверный или истекший код подтверждения',
+        });
+      }
+
+      // Find user
+      const user = await User.findByEmail(email);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          error: 'Пользователь не найден',
+        });
+      }
+
+      // Delete used code
+      await VerificationCodeModel.deleteByEmail(email);
+
+      // Generate tokens
+      const { token, refreshToken } = generateTokens({
+        userId: user.id,
+        role: user.role,
+      });
+
+      res.json({
+        success: true,
+        message: 'Авторизация выполнена успешно',
+        token,
+        refreshToken,
+        data: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      });
+    } catch (error) {
+      console.error('Verify login code error:', error);
       res.status(500).json({
         success: false,
         error: 'Ошибка верификации кода',
