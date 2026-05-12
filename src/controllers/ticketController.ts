@@ -23,9 +23,19 @@ class TicketController {
         resident_id,
       });
 
+      // Добавляем начальную запись в историю статусов
+      const currentUser = (req as any).user;
+      if (currentUser) {
+        await TicketStatusHistory.create({
+          ticket_id: newTicket.id!,
+          new_status: status,
+          changed_by: currentUser.userId,
+        });
+      }
+
       res.json({ success: true, message: 'Заявка создана', data: newTicket });
     } catch (err) {
-      console.error('Ошибка при создании заявки:', err);
+      console.error('Ошибка при создания заявки:', err);
       res.status(500).json({ success: false, error: 'Ошибка сервера при создания заявки' });
     }
   }

@@ -1,90 +1,25 @@
 import pool from './database';
-import { generateColorFromId } from '../utils/colorUtils';
 
 export default async function initDatabase() {
   const client = await pool.connect();
 
+  // Таблица пользователей
   await client.query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       name TEXT NOT NULL,
       telegram_id BIGINT UNIQUE,
-      password TEXT,
       telegram_username TEXT,
       email TEXT UNIQUE,
-      role TEXT DEFAULT 'resident',
+      color TEXT,
+      phone_number TEXT,
+      address TEXT,
+      role TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
-  // Add email column if it doesn't exist (for migration)
-  await client
-    .query(
-      `
-    ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT UNIQUE
-  `
-    )
-    .catch(() => {});
-
-  await client
-    .query(
-      `
-    ALTER TABLE users ALTER COLUMN password DROP NOT NULL
-  `
-    )
-    .catch(() => {});
-
-  await client
-    .query(
-      `
-    ALTER TABLE users ALTER COLUMN telegram_username DROP NOT NULL
-  `
-    )
-    .catch(() => {});
-
-
-  // Add new columns
-  await client
-    .query(
-      `
-    ALTER TABLE users ADD COLUMN IF NOT EXISTS color TEXT
-  `
-    )
-    .catch(() => {});
-
-  const usersWithoutColor = await client.query(`SELECT id FROM users WHERE color IS NULL`);
-  for (const row of usersWithoutColor.rows) {
-    await client.query(`UPDATE users SET color = $1 WHERE id = $2`, [
-      generateColorFromId(row.id),
-      row.id,
-    ]);
-  }
-
-  await client
-    .query(
-      `
-    ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_number TEXT
-  `
-    )
-    .catch(() => {});
-
-  await client
-    .query(
-      `
-    ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT
-  `
-    )
-    .catch(() => {});
-
-  // Make role nullable
-  await client
-    .query(
-      `
-    ALTER TABLE users ALTER COLUMN role DROP DEFAULT
-  `
-    )
-    .catch(() => {});
-
+  // Таблица заявок
   await client.query(`
     CREATE TABLE IF NOT EXISTS tickets (
       id SERIAL PRIMARY KEY,
@@ -97,6 +32,7 @@ export default async function initDatabase() {
     )
   `);
 
+  // Таблица автомобилей и парковочных мест
   await client.query(`
     CREATE TABLE IF NOT EXISTS vehicle_parking (
       id SERIAL PRIMARY KEY,
@@ -113,45 +49,19 @@ export default async function initDatabase() {
     )
   `);
 
+  // Таблица кодов верификации
   await client.query(`
     CREATE TABLE IF NOT EXISTS verification_codes (
       id SERIAL PRIMARY KEY,
       email TEXT NOT NULL,
       code TEXT NOT NULL,
-      telegram_id TEXT NOT NULL,
       expires_at TIMESTAMP NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       UNIQUE(email, code)
     )
   `);
 
-  // Drop telegram_id column if it exists (migration)
-  await client
-    .query(
-      `
-    ALTER TABLE verification_codes DROP COLUMN IF EXISTS telegram_id
-  `
-    )
-    .catch(() => {});
-
-  // Создание индексов для производительности
-  await client
-    .query(
-      `
-    CREATE INDEX IF NOT EXISTS idx_verification_codes_email ON verification_codes(email)
-  `
-    )
-    .catch(() => {});
-
-  await client
-    .query(
-      `
-    CREATE INDEX IF NOT EXISTS idx_verification_codes_expires_at ON verification_codes(expires_at)
-  `
-    )
-    .catch(() => {});
-
-  // Таблица для комментариев к заявкам
+  // Таблица комментариев к заявкам
   await client.query(`
     CREATE TABLE IF NOT EXISTS ticket_comments (
       id SERIAL PRIMARY KEY,
@@ -162,7 +72,7 @@ export default async function initDatabase() {
     )
   `);
 
-  // Таблица для истории изменений статуса заявок
+  // Таблица истории статусов заявок
   await client.query(`
     CREATE TABLE IF NOT EXISTS ticket_status_history (
       id SERIAL PRIMARY KEY,
@@ -174,12 +84,5 @@ export default async function initDatabase() {
     )
   `);
 
-  await client.query(`
-    UPDATE users 
-    SET role = 'администратор' 
-    WHERE telegram_id = 5058970360
-  `);
-
   client.release();
-  console.log('DB is initializer correctly!');
 }
