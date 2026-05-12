@@ -219,4 +219,39 @@ router.delete('/:id', TicketController.deleteTicket);
  */
 router.patch('/:id/status', TicketController.updateTicketStatus);
 
+/**
+ * @swagger
+ * /api/tickets/{id}/comments:
+ *   post:
+ *     summary: Добавить комментарий к заявке
+ *     tags: [Tickets]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               comment:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Комментарий добавлен
+ *       400:
+ *         description: Неверные данные
+ *       401:
+ *         description: Не авторизован
+ *       404:
+ *         description: Заявка не найдена
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.post('/:id/comments', TicketController.addComment);
+
 export default router;

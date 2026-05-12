@@ -87,7 +87,7 @@ class UserController {
       let userId: number | undefined;
 
       if (req.params.id === 'me') {
-        userId = (req as any).user?.userId ?? Number(req.session?.userId);
+        userId = (req as any).user?.userId ?? (req as any).session?.userId;
       } else if (req.params.id) {
         userId = parseInt(req.params.id, 10);
       }
