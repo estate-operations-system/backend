@@ -65,8 +65,8 @@ class TicketController {
         data: {
           ...ticket,
           comments,
-          statusHistory
-        }
+          statusHistory,
+        },
       });
     } catch (err) {
       console.error('Ошибка при получении заявки по id:', err);
@@ -210,7 +210,7 @@ class TicketController {
 
       // Получаем комментарий с именем пользователя
       const comments = await TicketComment.findByTicketId(ticketId);
-      const addedComment = comments.find(c => c.id === newComment.id);
+      const addedComment = comments.find((c) => c.id === newComment.id);
 
       res.json({
         success: true,
