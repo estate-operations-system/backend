@@ -3,6 +3,7 @@ import Ticket from '../models/ticketModel';
 import User from '../models/userModel';
 import TicketComment from '../models/ticketCommentModel';
 import TicketStatusHistory from '../models/ticketStatusHistoryModel';
+import { sendTelegramMessageToId } from '../utils/telegramService';
 
 class TicketController {
   static async createTicket(req: Request, res: Response) {
@@ -168,6 +169,19 @@ class TicketController {
         new_status: status,
         changed_by: currentUser.userId,
       });
+
+      try {
+        if (ticket.resident_id) {
+          const resident = await User.findById(ticket.resident_id);
+          if (resident && resident.telegram_id) {
+            const oldStatus = ticket.status || '';
+            const message = `Уведомление по заявке №${ticketId}: статус изменён с "${oldStatus}" на "${status}".`;
+            await sendTelegramMessageToId(resident.telegram_id as any, message);
+          }
+        }
+      } catch (notifyErr) {
+        console.error('Ошибка при отправке telegram-уведомления:', notifyErr);
+      }
 
       res.json({
         success: true,

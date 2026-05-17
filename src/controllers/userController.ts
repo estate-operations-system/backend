@@ -433,7 +433,6 @@ class UserController {
         telegram_id: data.id,
         telegram_username: data.username || null,
         password: null,
-        // email не указываем для Telegram пользователей
       });
       console.log('Created new user:', user.id);
     }
@@ -461,7 +460,6 @@ class UserController {
     });
   }
 
-  // Email-only authentication methods (without telegram_id)
   static async sendRegistrationCode(req: Request, res: Response) {
     try {
       const { email, name } = req.body;
