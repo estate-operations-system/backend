@@ -3,6 +3,7 @@ import Ticket from '../models/ticketModel';
 import User from '../models/userModel';
 import TicketComment from '../models/ticketCommentModel';
 import TicketStatusHistory from '../models/ticketStatusHistoryModel';
+import { sendTelegramMessageToId } from '../utils/telegramService';
 
 class TicketController {
   static async createTicket(req: Request, res: Response) {
@@ -23,7 +24,6 @@ class TicketController {
         resident_id,
       });
 
-      // Добавляем начальную запись в историю статусов
       const currentUser = (req as any).user;
       if (currentUser) {
         await TicketStatusHistory.create({
@@ -47,6 +47,35 @@ class TicketController {
     } catch (error) {
       console.error('Ошибка при получении заявок:', error);
       res.status(500).json({ success: false, error: 'Ошибка сервера при получении заявок' });
+    }
+  }
+
+  static async getTicketsByResident(req: Request, res: Response) {
+    try {
+      const residentId = parseInt(req.params.residentId, 10);
+      if (Number.isNaN(residentId)) {
+        return res.status(400).json({ success: false, error: 'Неверный residentId' });
+      }
+
+      const tickets = await Ticket.findByResidentId(residentId);
+      res.json({ success: true, count: tickets.length, data: tickets });
+    } catch (error) {
+      console.error('Ошибка при получении заявок резидента:', error);
+      res
+        .status(500)
+        .json({ success: false, error: 'Ошибка сервера при получении заявок резидента' });
+    }
+  }
+
+  static async getTicketStats(req: Request, res: Response) {
+    try {
+      const stats = await Ticket.countStats();
+      res.json({ success: true, data: { total: stats.total, inProgress: stats.in_progress } });
+    } catch (error) {
+      console.error('Ошибка при получении статистики заявок:', error);
+      res
+        .status(500)
+        .json({ success: false, error: 'Ошибка сервера при получении статистики заявок' });
     }
   }
 
@@ -114,10 +143,8 @@ class TicketController {
     }
   }
 
-  // Обновление статуса заявки (только для администраторов)
   static async updateTicketStatus(req: Request, res: Response) {
     try {
-      // Проверяем, что текущий пользователь - администратор
       const currentUser = (req as any).user;
       if (!currentUser) {
         return res.status(401).json({ success: false, error: 'Пользователь не авторизован' });
@@ -152,7 +179,6 @@ class TicketController {
         return res.status(404).json({ success: false, error: 'Заявка не найдена' });
       }
 
-      // Обновляем только статус, сохраняя остальные поля
       const updatedTicket = await Ticket.update(ticketId, {
         category: ticket.category,
         description: ticket.description || '',
@@ -161,13 +187,25 @@ class TicketController {
         resident_id: ticket.resident_id,
       });
 
-      // Добавляем запись в историю статусов
       await TicketStatusHistory.create({
         ticket_id: ticketId,
         old_status: ticket.status,
         new_status: status,
         changed_by: currentUser.userId,
       });
+
+      try {
+        if (ticket.resident_id) {
+          const resident = await User.findById(ticket.resident_id);
+          if (resident && resident.telegram_id) {
+            const oldStatus = ticket.status || '';
+            const message = `Уведомление по заявке №${ticketId}: статус изменён с "${oldStatus}" на "${status}".`;
+            await sendTelegramMessageToId(resident.telegram_id as any, message);
+          }
+        }
+      } catch (notifyErr) {
+        console.error('Ошибка при отправке telegram-уведомления:', notifyErr);
+      }
 
       res.json({
         success: true,
@@ -182,7 +220,6 @@ class TicketController {
     }
   }
 
-  // Добавление комментария к заявке
   static async addComment(req: Request, res: Response) {
     try {
       const currentUser = (req as any).user;
@@ -208,7 +245,6 @@ class TicketController {
         comment: comment.trim(),
       });
 
-      // Получаем комментарий с именем пользователя
       const comments = await TicketComment.findByTicketId(ticketId);
       const addedComment = comments.find((c) => c.id === newComment.id);
 

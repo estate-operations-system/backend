@@ -15,26 +15,18 @@ export interface TokenPair {
   refreshToken: string;
 }
 
-/**
- * Генерирует пару токенов (access + refresh)
- * Access token: 1 минута
- * Refresh token: 1 час
- */
 export function generateTokens(payload: TokenPayload): TokenPair {
   const token = jwt.sign(payload, JWT_SECRET, {
     expiresIn: '1m',
   });
 
   const refreshToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
-    expiresIn: '1h',
+    expiresIn: '1d',
   });
 
   return { token, refreshToken };
 }
 
-/**
- * Проверяет access token
- */
 export function verifyToken(token: string): TokenPayload | null {
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
@@ -45,9 +37,6 @@ export function verifyToken(token: string): TokenPayload | null {
   }
 }
 
-/**
- * Проверяет refresh token
- */
 export function verifyRefreshToken(refreshToken: string): TokenPayload | null {
   try {
     const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET) as TokenPayload;
@@ -58,9 +47,6 @@ export function verifyRefreshToken(refreshToken: string): TokenPayload | null {
   }
 }
 
-/**
- * Обновляет access token используя refresh token
- */
 export function refreshAccessToken(refreshToken: string): TokenPair | null {
   const payload = verifyRefreshToken(refreshToken);
   if (!payload) {

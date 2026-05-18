@@ -433,7 +433,6 @@ class UserController {
         telegram_id: data.id,
         telegram_username: data.username || null,
         password: null,
-        // email не указываем для Telegram пользователей
       });
       console.log('Created new user:', user.id);
     }
@@ -461,7 +460,6 @@ class UserController {
     });
   }
 
-  // Email-only authentication methods (without telegram_id)
   static async sendRegistrationCode(req: Request, res: Response) {
     try {
       const { email, name } = req.body;
@@ -473,7 +471,6 @@ class UserController {
         });
       }
 
-      // Check if user already exists
       const existingUser = await User.findByEmail(email);
       if (existingUser) {
         return res.status(409).json({
@@ -530,7 +527,6 @@ class UserController {
         });
       }
 
-      // Check if user already exists
       const existingUser = await User.findByEmail(email);
       if (existingUser) {
         return res.status(409).json({
@@ -539,7 +535,6 @@ class UserController {
         });
       }
 
-      // Create new user
       const user = await User.create({
         name,
         email,
@@ -548,10 +543,8 @@ class UserController {
         password: null,
       });
 
-      // Delete used code
       await VerificationCodeModel.deleteByEmail(email);
 
-      // Generate tokens
       const { token, refreshToken } = generateTokens({
         userId: user.id!,
         role: user.role,
@@ -589,7 +582,6 @@ class UserController {
         });
       }
 
-      // Check if user exists
       const existingUser = await User.findByEmail(email);
       if (!existingUser) {
         return res.status(404).json({
@@ -646,7 +638,6 @@ class UserController {
         });
       }
 
-      // Find user
       const user = await User.findByEmail(email);
       if (!user) {
         return res.status(404).json({
@@ -655,10 +646,8 @@ class UserController {
         });
       }
 
-      // Delete used code
       await VerificationCodeModel.deleteByEmail(email);
 
-      // Generate tokens
       const { token, refreshToken } = generateTokens({
         userId: user.id,
         role: user.role,
@@ -685,10 +674,8 @@ class UserController {
     }
   }
 
-  // Обновление роли пользователя (только для администраторов)
   static async updateUserRole(req: Request, res: Response) {
     try {
-      // Проверяем, что текущий пользователь - администратор
       const currentUser = (req as any).user;
       if (!currentUser) {
         return res.status(401).json({ success: false, error: 'Пользователь не авторизован' });
