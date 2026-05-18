@@ -18,6 +18,27 @@ class TicketModel {
     return result.rows;
   }
 
+  static async findByResidentId(residentId: number): Promise<Ticket[]> {
+    const result = await pool.query(
+      'SELECT * FROM tickets WHERE resident_id = $1 ORDER BY id',
+      [residentId]
+    );
+    return result.rows;
+  }
+
+  static async countStats(): Promise<{ total: number; in_progress: number }> {
+    const result = await pool.query(
+      `SELECT COUNT(*) AS total,
+              SUM(CASE WHEN status = 'В работе' THEN 1 ELSE 0 END) AS in_progress
+       FROM tickets`
+    );
+    const row = result.rows[0];
+    return {
+      total: Number(row.total),
+      in_progress: Number(row.in_progress),
+    };
+  }
+
   static async findById(id: number): Promise<Ticket | null> {
     const result = await pool.query('SELECT * FROM tickets WHERE id = $1', [id]);
     return result.rows[0] || null;

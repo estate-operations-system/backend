@@ -115,6 +115,42 @@ router.get('/', TicketController.getAllTickets);
 
 /**
  * @swagger
+ * /api/tickets/resident/{residentId}:
+ *   get:
+ *     summary: Получить заявки конкретного резидента
+ *     tags: [Tickets]
+ *     parameters:
+ *       - in: path
+ *         name: residentId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Список заявок резидента
+ *       400:
+ *         description: Неверный residentId
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.get('/resident/:residentId', TicketController.getTicketsByResident);
+
+/**
+ * @swagger
+ * /api/tickets/stats:
+ *   get:
+ *     summary: Получить статистику заявок
+ *     tags: [Tickets]
+ *     responses:
+ *       200:
+ *         description: Статистика заявок
+ *       500:
+ *         description: Ошибка сервера
+ */
+router.get('/stats', TicketController.getTicketStats);
+
+/**
+ * @swagger
  * /api/tickets/{id}:
  *   get:
  *     summary: Получить заявку по ID
