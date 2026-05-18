@@ -61,7 +61,9 @@ class TicketController {
       res.json({ success: true, count: tickets.length, data: tickets });
     } catch (error) {
       console.error('Ошибка при получении заявок резидента:', error);
-      res.status(500).json({ success: false, error: 'Ошибка сервера при получении заявок резидента' });
+      res
+        .status(500)
+        .json({ success: false, error: 'Ошибка сервера при получении заявок резидента' });
     }
   }
 
@@ -71,7 +73,9 @@ class TicketController {
       res.json({ success: true, data: { total: stats.total, inProgress: stats.in_progress } });
     } catch (error) {
       console.error('Ошибка при получении статистики заявок:', error);
-      res.status(500).json({ success: false, error: 'Ошибка сервера при получении статистики заявок' });
+      res
+        .status(500)
+        .json({ success: false, error: 'Ошибка сервера при получении статистики заявок' });
     }
   }
 

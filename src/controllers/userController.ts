@@ -160,7 +160,7 @@ class UserController {
     }
   }
 
-  static async deleteUser(req: Request, res: Response) {  
+  static async deleteUser(req: Request, res: Response) {
     try {
       const user = await User.findById(parseInt(req.params.id, 10));
       if (!user) {

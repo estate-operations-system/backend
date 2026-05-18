@@ -19,10 +19,9 @@ class TicketModel {
   }
 
   static async findByResidentId(residentId: number): Promise<Ticket[]> {
-    const result = await pool.query(
-      'SELECT * FROM tickets WHERE resident_id = $1 ORDER BY id',
-      [residentId]
-    );
+    const result = await pool.query('SELECT * FROM tickets WHERE resident_id = $1 ORDER BY id', [
+      residentId,
+    ]);
     return result.rows;
   }
 
