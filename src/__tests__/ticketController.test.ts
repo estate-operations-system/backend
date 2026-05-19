@@ -14,7 +14,7 @@ describe('TicketController', () => {
   });
 
   it('returns 400 when createTicket has missing fields', async () => {
-    const { default: TicketController } = require('../controllers/ticketController');
+    const { default: TicketController } = await import('../controllers/ticketController');
     const req: any = { body: { category: 'test', address: null, status: 'Новая', resident_id: 1 } };
     const res = mockResponse();
 
@@ -34,7 +34,7 @@ describe('TicketController', () => {
       default: { create: jest.fn<any>().mockResolvedValue(undefined) },
     }));
 
-    const { default: TicketController } = require('../controllers/ticketController');
+    const { default: TicketController } = await import('../controllers/ticketController');
     const req: any = {
       body: { category: 'test', address: 'addr', status: 'Новая', resident_id: 2 },
       user: { userId: 3 },
@@ -43,7 +43,11 @@ describe('TicketController', () => {
 
     await TicketController.createTicket(req, res);
 
-    expect(res.json).toHaveBeenCalledWith({ success: true, message: 'Заявка создана', data: ticketRecord });
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: 'Заявка создана',
+      data: ticketRecord,
+    });
   });
 
   it('returns 404 when getTicketById misses ticket', async () => {
@@ -52,7 +56,7 @@ describe('TicketController', () => {
       default: { findById: jest.fn<any>().mockResolvedValue(null) },
     }));
 
-    const { default: TicketController } = require('../controllers/ticketController');
+    const { default: TicketController } = await import('../controllers/ticketController');
     const req: any = { params: { id: '20' } };
     const res = mockResponse();
 
@@ -79,7 +83,7 @@ describe('TicketController', () => {
       default: { findByTicketId: jest.fn<any>().mockResolvedValue(history) },
     }));
 
-    const { default: TicketController } = require('../controllers/ticketController');
+    const { default: TicketController } = await import('../controllers/ticketController');
     const req: any = { params: { id: '20' } };
     const res = mockResponse();
 
@@ -92,7 +96,7 @@ describe('TicketController', () => {
   });
 
   it('returns 401 from updateTicketStatus when no authenticated user', async () => {
-    const { default: TicketController } = require('../controllers/ticketController');
+    const { default: TicketController } = await import('../controllers/ticketController');
     const req: any = { params: { id: '1' }, body: { status: 'Новая' } };
     const res = mockResponse();
 
@@ -107,7 +111,7 @@ describe('TicketController', () => {
       __esModule: true,
       default: { findById: jest.fn<any>().mockResolvedValue({ id: 2, role: 'жилец' }) },
     }));
-    const { default: TicketController } = require('../controllers/ticketController');
+    const { default: TicketController } = await import('../controllers/ticketController');
     const req: any = { params: { id: '1' }, body: { status: 'Новая' }, user: { userId: 2 } };
     const res = mockResponse();
 
@@ -117,7 +121,14 @@ describe('TicketController', () => {
   });
 
   it('updates ticket status, records history and notifies telegram', async () => {
-    const ticket = { id: 7, status: 'Новая', category: 'cat', description: 'desc', address: 'addr', resident_id: 8 };
+    const ticket = {
+      id: 7,
+      status: 'Новая',
+      category: 'cat',
+      description: 'desc',
+      address: 'addr',
+      resident_id: 8,
+    };
     const updatedTicket = { ...ticket, status: 'В работе' };
     const adminUser = { id: 99, role: 'администратор' };
     const resident = { id: 8, telegram_id: '123' };
@@ -145,7 +156,7 @@ describe('TicketController', () => {
     const sendTelegramMessageToId = jest.fn<any>().mockResolvedValue(undefined);
     jest.doMock('../utils/telegramService', () => ({ __esModule: true, sendTelegramMessageToId }));
 
-    const { default: TicketController } = require('../controllers/ticketController');
+    const { default: TicketController } = await import('../controllers/ticketController');
     const req: any = { params: { id: '7' }, body: { status: 'В работе' }, user: { userId: 99 } };
     const res = mockResponse();
 
@@ -159,14 +170,17 @@ describe('TicketController', () => {
   });
 
   it('returns 400 when addComment comment is empty', async () => {
-    const { default: TicketController } = require('../controllers/ticketController');
+    const { default: TicketController } = await import('../controllers/ticketController');
     const req: any = { params: { id: '1' }, body: { comment: '  ' }, user: { userId: 5 } };
     const res = mockResponse();
 
     await TicketController.addComment(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ success: false, error: 'Комментарий не может быть пустым' });
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      error: 'Комментарий не может быть пустым',
+    });
   });
 
   it('adds comment and returns saved comment', async () => {
@@ -183,7 +197,7 @@ describe('TicketController', () => {
       },
     }));
 
-    const { default: TicketController } = require('../controllers/ticketController');
+    const { default: TicketController } = await import('../controllers/ticketController');
     const req: any = { params: { id: '5' }, body: { comment: 'Hello' }, user: { userId: 5 } };
     const res = mockResponse();
 

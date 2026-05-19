@@ -1,6 +1,6 @@
 import { describe, it, expect } from '@jest/globals';
 
-const { generateColorFromId } = require('../utils/colorUtils');
+import { generateColorFromId } from '../utils/colorUtils';
 
 describe('colorUtils', () => {
   it('returns default color for undefined or null id', () => {

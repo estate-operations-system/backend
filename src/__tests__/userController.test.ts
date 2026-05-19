@@ -14,14 +14,17 @@ describe('UserController', () => {
   });
 
   it('returns 400 when createUser misses required fields', async () => {
-    const { default: UserController } = require('../controllers/userController');
+    const { default: UserController } = await import('../controllers/userController');
     const req: any = { body: { name: null, telegram_id: null } };
     const res = mockResponse();
 
     await UserController.createUser(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({ success: false, error: 'Имя и telegram_id обязательны' });
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      error: 'Имя и telegram_id обязательны',
+    });
   });
 
   it('returns 409 when createUser finds existing telegram_id', async () => {
@@ -32,7 +35,7 @@ describe('UserController', () => {
       },
     }));
 
-    const { default: UserController } = require('../controllers/userController');
+    const { default: UserController } = await import('../controllers/userController');
     const req: any = { body: { name: 'Ivan', telegram_id: '55' } };
     const res = mockResponse();
 
@@ -55,7 +58,7 @@ describe('UserController', () => {
       },
     }));
 
-    const { default: UserController } = require('../controllers/userController');
+    const { default: UserController } = await import('../controllers/userController');
     const req: any = { body: { name: 'Ivan', telegram_id: '55' } };
     const res = mockResponse();
 
@@ -77,7 +80,7 @@ describe('UserController', () => {
       },
     }));
 
-    const { default: UserController } = require('../controllers/userController');
+    const { default: UserController } = await import('../controllers/userController');
     const req: any = {};
     const res = mockResponse();
 
@@ -92,7 +95,7 @@ describe('UserController', () => {
       default: { findById: jest.fn<any>().mockResolvedValue(null) },
     }));
 
-    const { default: UserController } = require('../controllers/userController');
+    const { default: UserController } = await import('../controllers/userController');
     const req: any = { params: { id: '5' } };
     const res = mockResponse();
 
@@ -103,8 +106,8 @@ describe('UserController', () => {
   });
 
   it('returns authenticated false for authStatus when no user present', async () => {
-    const { default: UserController } = require('../controllers/userController');
-    const req: any = {}; 
+    const { default: UserController } = await import('../controllers/userController');
+    const req: any = {};
     const res = mockResponse();
 
     await UserController.authStatus(req, res);
@@ -113,7 +116,7 @@ describe('UserController', () => {
   });
 
   it('returns 401 from refreshToken if refreshToken missing', async () => {
-    const { default: UserController } = require('../controllers/userController');
+    const { default: UserController } = await import('../controllers/userController');
     const req: any = { body: {} };
     const res = mockResponse();
 
@@ -129,14 +132,17 @@ describe('UserController', () => {
       refreshAccessToken: jest.fn().mockReturnValue(null),
     }));
 
-    const { default: UserController } = require('../controllers/userController');
+    const { default: UserController } = await import('../controllers/userController');
     const req: any = { body: { refreshToken: 'bad' } };
     const res = mockResponse();
 
     await UserController.refreshToken(req, res);
 
     expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({ success: false, error: 'Invalid or expired refresh token' });
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      error: 'Invalid or expired refresh token',
+    });
   });
 
   it('sends registration code when data is valid', async () => {
@@ -159,18 +165,21 @@ describe('UserController', () => {
     }));
     jest.doMock('../utils/emailService', () => ({ __esModule: true, default: mockEmailService }));
 
-    const { default: UserController } = require('../controllers/userController');
+    const { default: UserController } = await import('../controllers/userController');
     const req: any = { body: { email: 'test@example.com', name: 'Ivan' } };
     const res = mockResponse();
 
     await UserController.sendRegistrationCode(req, res);
 
-    expect(res.json).toHaveBeenCalledWith({ success: true, message: 'Код подтверждения отправлен на ваш email' });
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: 'Код подтверждения отправлен на ваш email',
+    });
     expect(mockEmailService).toHaveBeenCalled();
   });
 
   it('returns 400 when verifyLoginCode is called with missing fields', async () => {
-    const { default: UserController } = require('../controllers/userController');
+    const { default: UserController } = await import('../controllers/userController');
     const req: any = { body: { email: null, code: null } };
     const res = mockResponse();
 

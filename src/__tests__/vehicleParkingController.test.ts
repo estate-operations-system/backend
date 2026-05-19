@@ -14,7 +14,8 @@ describe('VehicleParkingController', () => {
   });
 
   it('returns 400 when createVehicleParking misses required fields', async () => {
-    const { default: VehicleParkingController } = require('../controllers/vehicleParkingController');
+    const { default: VehicleParkingController } =
+      await import('../controllers/vehicleParkingController');
     const req: any = { body: { user_id: null, license_plate: '', parking_spot: null } };
     const res = mockResponse();
 
@@ -30,16 +31,27 @@ describe('VehicleParkingController', () => {
       default: { create: jest.fn<any>().mockResolvedValue(newRecord) },
     }));
 
-    const { default: VehicleParkingController } = require('../controllers/vehicleParkingController');
+    const { default: VehicleParkingController } =
+      await import('../controllers/vehicleParkingController');
     const req: any = {
-      body: { user_id: 5, license_plate: 'ABC123', parking_spot: 'P1', vehicle_make: 'Toy', vehicle_model: 'Corolla' },
+      body: {
+        user_id: 5,
+        license_plate: 'ABC123',
+        parking_spot: 'P1',
+        vehicle_make: 'Toy',
+        vehicle_model: 'Corolla',
+      },
     };
     const res = mockResponse();
 
     await VehicleParkingController.createVehicleParking(req, res);
 
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({ success: true, message: 'Запись создана', data: newRecord });
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: 'Запись создана',
+      data: newRecord,
+    });
   });
 
   it('returns all vehicle parking rows', async () => {
@@ -49,7 +61,8 @@ describe('VehicleParkingController', () => {
       default: { findAll: jest.fn<any>().mockResolvedValue(items) },
     }));
 
-    const { default: VehicleParkingController } = require('../controllers/vehicleParkingController');
+    const { default: VehicleParkingController } =
+      await import('../controllers/vehicleParkingController');
     const req: any = {};
     const res = mockResponse();
 
@@ -64,7 +77,8 @@ describe('VehicleParkingController', () => {
       default: { findById: jest.fn<any>().mockResolvedValue(null) },
     }));
 
-    const { default: VehicleParkingController } = require('../controllers/vehicleParkingController');
+    const { default: VehicleParkingController } =
+      await import('../controllers/vehicleParkingController');
     const req: any = { params: { id: '99' } };
     const res = mockResponse();
 
@@ -80,7 +94,8 @@ describe('VehicleParkingController', () => {
       default: { findByUserId: jest.fn<any>().mockResolvedValue(rows) },
     }));
 
-    const { default: VehicleParkingController } = require('../controllers/vehicleParkingController');
+    const { default: VehicleParkingController } =
+      await import('../controllers/vehicleParkingController');
     const req: any = { params: { userId: '3' } };
     const res = mockResponse();
 
@@ -95,7 +110,8 @@ describe('VehicleParkingController', () => {
       default: { findById: jest.fn<any>().mockResolvedValue(null) },
     }));
 
-    const { default: VehicleParkingController } = require('../controllers/vehicleParkingController');
+    const { default: VehicleParkingController } =
+      await import('../controllers/vehicleParkingController');
     const req: any = { params: { id: '5' }, body: { license_plate: 'ABC123', parking_spot: 'P2' } };
     const res = mockResponse();
 
@@ -107,10 +123,22 @@ describe('VehicleParkingController', () => {
   it('returns 400 when updateVehicleParking has invalid license_plate or parking_spot', async () => {
     jest.doMock('../models/vehicleParkingModel', () => ({
       __esModule: true,
-      default: { findById: jest.fn<any>().mockResolvedValue({ id: 5, license_plate: 'OLD', parking_spot: 'OLD', vehicle_make: null, vehicle_model: null, vehicle_color: null, parking_zone: null, comment: null }) },
+      default: {
+        findById: jest.fn<any>().mockResolvedValue({
+          id: 5,
+          license_plate: 'OLD',
+          parking_spot: 'OLD',
+          vehicle_make: null,
+          vehicle_model: null,
+          vehicle_color: null,
+          parking_zone: null,
+          comment: null,
+        }),
+      },
     }));
 
-    const { default: VehicleParkingController } = require('../controllers/vehicleParkingController');
+    const { default: VehicleParkingController } =
+      await import('../controllers/vehicleParkingController');
     const req: any = { params: { id: '5' }, body: { license_plate: '', parking_spot: '' } };
     const res = mockResponse();
 
@@ -120,35 +148,60 @@ describe('VehicleParkingController', () => {
   });
 
   it('updates existing vehicle parking record', async () => {
-    const existing = { id: 5, license_plate: 'OLD', parking_spot: 'OLD', vehicle_make: 'X', vehicle_model: 'Y', vehicle_color: 'red', parking_zone: 'Z', comment: 'old' };
+    const existing = {
+      id: 5,
+      license_plate: 'OLD',
+      parking_spot: 'OLD',
+      vehicle_make: 'X',
+      vehicle_model: 'Y',
+      vehicle_color: 'red',
+      parking_zone: 'Z',
+      comment: 'old',
+    };
     const updated = { ...existing, license_plate: 'NEW', parking_spot: 'P1' };
     jest.doMock('../models/vehicleParkingModel', () => ({
       __esModule: true,
-      default: { findById: jest.fn<any>().mockResolvedValue(existing), update: jest.fn<any>().mockResolvedValue(updated) },
+      default: {
+        findById: jest.fn<any>().mockResolvedValue(existing),
+        update: jest.fn<any>().mockResolvedValue(updated),
+      },
     }));
 
-    const { default: VehicleParkingController } = require('../controllers/vehicleParkingController');
+    const { default: VehicleParkingController } =
+      await import('../controllers/vehicleParkingController');
     const req: any = { params: { id: '5' }, body: { license_plate: 'NEW', parking_spot: 'P1' } };
     const res = mockResponse();
 
     await VehicleParkingController.updateVehicleParking(req, res);
 
-    expect(res.json).toHaveBeenCalledWith({ success: true, message: 'Запись обновлена', data: updated });
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: 'Запись обновлена',
+      data: updated,
+    });
   });
 
   it('deletes vehicle parking record successfully', async () => {
     const existing = { id: 5, license_plate: 'OLD', parking_spot: 'OLD' };
     jest.doMock('../models/vehicleParkingModel', () => ({
       __esModule: true,
-      default: { findById: jest.fn<any>().mockResolvedValue(existing), delete: jest.fn<any>().mockResolvedValue(existing) },
+      default: {
+        findById: jest.fn<any>().mockResolvedValue(existing),
+        delete: jest.fn<any>().mockResolvedValue(existing),
+      },
     }));
 
-    const { default: VehicleParkingController } = require('../controllers/vehicleParkingController');
+    const { default: VehicleParkingController } =
+      await import('../controllers/vehicleParkingController');
     const req: any = { params: { id: '5' } };
     const res = mockResponse();
 
     await VehicleParkingController.deleteVehicleParking(req, res);
 
-    expect(res.json).toHaveBeenCalledWith({ success: true, message: 'Запись удалена', data: existing });
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: 'Запись удалена',
+      data: existing,
+    });
   });
 });
