@@ -4,7 +4,6 @@ const token = process.env.BOT_TOKEN;
 let bot: TelegramBot | null = null;
 
 if (token) {
-  // polling: false — backend will only send messages, not receive
   bot = new TelegramBot(token, { polling: false });
 } else {
   console.warn('BOT_TOKEN not set — Telegram notifications disabled');
