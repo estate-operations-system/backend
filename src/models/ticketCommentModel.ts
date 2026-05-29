@@ -6,7 +6,7 @@ export interface TicketComment {
   user_id: number;
   comment: string;
   created_at?: Date;
-  user_name?: string; // Для отображения имени пользователя
+  user_name?: string;
 }
 
 class TicketCommentModel {

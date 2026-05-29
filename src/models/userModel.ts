@@ -16,7 +16,6 @@ class UserModel {
       address,
     } = userData;
 
-    // Для Telegram пользователей не указываем email, чтобы избежать конфликтов с UNIQUE
     const fields = ['name', 'password', 'telegram_id', 'telegram_username'];
     const values = [name, password ?? null, telegram_id, telegram_username];
     const placeholders = ['$1', '$2', '$3', '$4'];

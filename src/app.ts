@@ -50,10 +50,6 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
         ? botTokenHeader[0]
         : undefined;
 
-  console.log('Auth header:', authHeader);
-  console.log('Token:', token ? 'present' : 'missing');
-  console.log('Bot token header:', botToken ? 'present' : 'missing');
-
   if (botToken) {
     if (botToken === process.env.BOT_TOKEN) {
       console.log('Bot token auth accepted');

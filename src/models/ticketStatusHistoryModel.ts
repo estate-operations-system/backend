@@ -7,7 +7,7 @@ export interface TicketStatusHistory {
   new_status: string;
   changed_by?: number;
   changed_at?: Date;
-  changed_by_name?: string; // Для отображения имени пользователя
+  changed_by_name?: string;
 }
 
 class TicketStatusHistoryModel {

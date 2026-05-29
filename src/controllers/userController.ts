@@ -192,7 +192,6 @@ class UserController {
         telegram_id,
         telegram_username,
         password,
-        // email не указываем для обычной регистрации
       });
 
       if (!user.id) {
@@ -307,8 +306,6 @@ class UserController {
 
   static async logout(req: Request, res: Response) {
     try {
-      // Для JWT logout происходит на клиенте (удаление токена)
-      // Здесь просто возвращаем успех
       res.json({ success: true, authenticated: false });
     } catch (error) {
       console.error('Logout error:', error);
@@ -375,7 +372,6 @@ class UserController {
         telegram_id: data.id,
         telegram_username: data.username || null,
         password: null,
-        // email не указываем для Telegram пользователей
       });
     }
 
